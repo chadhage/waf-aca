@@ -227,6 +227,113 @@
         hub &mdash; it consumes central services rather than re-creating them.
       </p>
 
+      <!-- Diagram: hub & spoke landing zone -->
+      <div class="lz-diagram">
+        <div class="topo-tier">
+          <p class="topo-caption">Internet &rarr; controlled edge</p>
+          <div class="topo-row">
+            <div class="node accent">
+              <img src="assets/azure-icons/front-door.svg" alt="Azure Front Door" width="40" height="40" loading="lazy">
+              <span class="n-title">Front Door</span>
+              <span class="n-sub">global edge</span>
+            </div>
+            <div class="node accent">
+              <img src="assets/azure-icons/waf.svg" alt="Web Application Firewall policy" width="40" height="40" loading="lazy">
+              <span class="n-title">WAF policy</span>
+              <span class="n-sub">OWASP rules</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="topo-flow" aria-hidden="true">&darr;<small>TLS</small></div>
+
+        <div class="lz-sub platform">
+          <div class="lz-sub-head">
+            <img src="assets/azure-icons/subscription.svg" alt="" width="24" height="24" loading="lazy">
+            <div>
+              <div class="t">Platform landing zone</div>
+              <div class="s">Hub / platform subscriptions &middot; platform team</div>
+            </div>
+          </div>
+          <div class="topo-row">
+            <div class="node plain">
+              <img src="assets/azure-icons/firewall.svg" alt="Azure Firewall" width="40" height="40" loading="lazy">
+              <span class="n-title">Azure Firewall</span>
+              <span class="n-sub">central egress</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/virtual-network.svg" alt="Hub virtual network" width="40" height="40" loading="lazy">
+              <span class="n-title">Hub VNet</span>
+              <span class="n-sub">gateways &middot; DDoS</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/dns-zones.svg" alt="Private DNS zones" width="40" height="40" loading="lazy">
+              <span class="n-title">Private DNS</span>
+              <span class="n-sub">privatelink.*</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/managed-identity.svg" alt="Microsoft Entra identity" width="40" height="40" loading="lazy">
+              <span class="n-title">Microsoft Entra</span>
+              <span class="n-sub">tenant identity</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/log-analytics.svg" alt="Central Log Analytics and Sentinel" width="40" height="40" loading="lazy">
+              <span class="n-title">Log Analytics</span>
+              <span class="n-sub">Sentinel &middot; Defender</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/policy.svg" alt="Azure Policy" width="40" height="40" loading="lazy">
+              <span class="n-title">Azure Policy</span>
+              <span class="n-sub">governance</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="topo-flow lz-peer" aria-hidden="true">&#8597;<small>VNet peering &middot; forced-tunnel egress</small></div>
+
+        <div class="lz-sub workload">
+          <div class="lz-sub-head">
+            <img src="assets/azure-icons/subscription.svg" alt="" width="24" height="24" loading="lazy">
+            <div>
+              <div class="t">Application landing zone</div>
+              <div class="s">Workload spoke subscription &middot; workload team</div>
+            </div>
+          </div>
+          <div class="topo-row">
+            <div class="node plain">
+              <img src="assets/azure-icons/virtual-network.svg" alt="Spoke virtual network" width="40" height="40" loading="lazy">
+              <span class="n-title">Spoke VNet</span>
+              <span class="n-sub">delegated subnet</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/container-apps-env.svg" alt="Container Apps environment" width="40" height="40" loading="lazy">
+              <span class="n-title">ACA environment</span>
+              <span class="n-sub">VNet-injected</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/key-vault.svg" alt="Azure Key Vault" width="40" height="40" loading="lazy">
+              <span class="n-title">Key Vault</span>
+              <span class="n-sub">Secrets User</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/postgresql.svg" alt="Azure Database for PostgreSQL" width="40" height="40" loading="lazy">
+              <span class="n-title">PostgreSQL</span>
+              <span class="n-sub">private access</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/container-registry.svg" alt="Azure Container Registry" width="40" height="40" loading="lazy">
+              <span class="n-title">Registry</span>
+              <span class="n-sub">AcrPull</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/managed-identity.svg" alt="User-assigned managed identity" width="40" height="40" loading="lazy">
+              <span class="n-title">Managed identity</span>
+              <span class="n-sub">workload auth</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="grid-2">
         <div class="card lz-card">
           <span class="lz-tag hub">Platform landing zone</span>
@@ -327,6 +434,127 @@
         zone (subscription + environment) and share only what the platform can govern centrally. The Container Apps
         environment is the isolation, network, and billing boundary &mdash; so it follows the trust boundary.
       </p>
+
+      <!-- Diagram: multi-ACA fleet -->
+      <div class="lz-diagram">
+        <div class="lz-sub platform">
+          <div class="lz-sub-head">
+            <img src="assets/azure-icons/management-groups.svg" alt="" width="24" height="24" loading="lazy">
+            <div>
+              <div class="t">Shared platform</div>
+              <div class="s">One hub &amp; governance for the whole fleet</div>
+            </div>
+          </div>
+          <div class="topo-row">
+            <div class="node plain">
+              <img src="assets/azure-icons/front-door.svg" alt="Azure Front Door" width="40" height="40" loading="lazy">
+              <span class="n-title">Front Door</span>
+              <span class="n-sub">shared edge</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/firewall.svg" alt="Azure Firewall" width="40" height="40" loading="lazy">
+              <span class="n-title">Azure Firewall</span>
+              <span class="n-sub">central egress</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/dns-zones.svg" alt="Private DNS zones" width="40" height="40" loading="lazy">
+              <span class="n-title">Private DNS</span>
+              <span class="n-sub">shared zones</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/container-registry.svg" alt="Central Azure Container Registry" width="40" height="40" loading="lazy">
+              <span class="n-title">Central ACR</span>
+              <span class="n-sub">Premium &middot; geo-repl</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/log-analytics.svg" alt="Central Log Analytics and Sentinel" width="40" height="40" loading="lazy">
+              <span class="n-title">Log Analytics</span>
+              <span class="n-sub">Sentinel &middot; Defender</span>
+            </div>
+            <div class="node plain">
+              <img src="assets/azure-icons/policy.svg" alt="Azure Policy and management groups" width="40" height="40" loading="lazy">
+              <span class="n-title">Policy</span>
+              <span class="n-sub">guardrails &middot; vending</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="topo-flow" aria-hidden="true">&darr;<small>peering &middot; shared services &middot; policy</small></div>
+
+        <div class="lz-fleet">
+          <div class="lz-sub workload">
+            <div class="lz-sub-head">
+              <img src="assets/azure-icons/subscription.svg" alt="" width="24" height="24" loading="lazy">
+              <div>
+                <div class="t">BU A &middot; Payments</div>
+                <div class="s">own landing zone</div>
+              </div>
+            </div>
+            <div class="topo-row">
+              <div class="node plain mini">
+                <img src="assets/azure-icons/container-apps-env.svg" alt="Container Apps environment" width="30" height="30" loading="lazy">
+                <span class="n-title">ACA env</span>
+              </div>
+              <div class="node plain mini">
+                <img src="assets/azure-icons/key-vault.svg" alt="Azure Key Vault" width="30" height="30" loading="lazy">
+                <span class="n-title">Key Vault</span>
+              </div>
+              <div class="node plain mini">
+                <img src="assets/azure-icons/postgresql.svg" alt="Azure Database for PostgreSQL" width="30" height="30" loading="lazy">
+                <span class="n-title">PostgreSQL</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lz-sub workload">
+            <div class="lz-sub-head">
+              <img src="assets/azure-icons/subscription.svg" alt="" width="24" height="24" loading="lazy">
+              <div>
+                <div class="t">BU B &middot; Catalog</div>
+                <div class="s">own landing zone</div>
+              </div>
+            </div>
+            <div class="topo-row">
+              <div class="node plain mini">
+                <img src="assets/azure-icons/container-apps-env.svg" alt="Container Apps environment" width="30" height="30" loading="lazy">
+                <span class="n-title">ACA env</span>
+              </div>
+              <div class="node plain mini">
+                <img src="assets/azure-icons/key-vault.svg" alt="Azure Key Vault" width="30" height="30" loading="lazy">
+                <span class="n-title">Key Vault</span>
+              </div>
+              <div class="node plain mini">
+                <img src="assets/azure-icons/postgresql.svg" alt="Azure Database for PostgreSQL" width="30" height="30" loading="lazy">
+                <span class="n-title">PostgreSQL</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lz-sub workload">
+            <div class="lz-sub-head">
+              <img src="assets/azure-icons/subscription.svg" alt="" width="24" height="24" loading="lazy">
+              <div>
+                <div class="t">BU C &middot; Analytics</div>
+                <div class="s">own landing zone</div>
+              </div>
+            </div>
+            <div class="topo-row">
+              <div class="node plain mini">
+                <img src="assets/azure-icons/container-apps-env.svg" alt="Container Apps environment" width="30" height="30" loading="lazy">
+                <span class="n-title">ACA env</span>
+              </div>
+              <div class="node plain mini">
+                <img src="assets/azure-icons/key-vault.svg" alt="Azure Key Vault" width="30" height="30" loading="lazy">
+                <span class="n-title">Key Vault</span>
+              </div>
+              <div class="node plain mini">
+                <img src="assets/azure-icons/postgresql.svg" alt="Azure Database for PostgreSQL" width="30" height="30" loading="lazy">
+                <span class="n-title">PostgreSQL</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="grid-2">
         <div class="card lz-card">
