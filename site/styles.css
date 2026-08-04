@@ -202,6 +202,44 @@ section { padding: 46px 0; }
 
 .arch { font-family: var(--mono); font-size: 13px; color: var(--text-dim); background: var(--bg-alt); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 18px; overflow-x: auto; white-space: pre; }
 
+/* ---------- Reference topology diagram ---------- */
+.topology {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--bg-alt); border: 1px solid var(--border-soft);
+  border-radius: var(--radius); padding: 26px 20px;
+}
+.topo-tier { display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%; }
+.topo-caption {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text-faint);
+}
+.topo-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; width: 100%; }
+.topo-flow {
+  color: var(--accent); font-size: 20px; line-height: 1;
+  padding: 10px 0 6px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.topo-flow small { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.5px; color: var(--text-faint); text-transform: uppercase; }
+.node {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm); padding: 14px 12px; width: 140px; box-sizing: border-box;
+}
+.node img { width: 40px; height: 40px; display: block; }
+.node .n-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.node .n-sub { font-size: 11px; color: var(--text-faint); font-family: var(--mono); line-height: 1.4; }
+.node.accent { border-color: rgba(74, 168, 255, 0.4); }
+.topo-env {
+  width: 100%; border: 1px dashed var(--accent); border-radius: var(--radius);
+  background: var(--accent-soft); padding: 16px 14px; box-sizing: border-box;
+}
+.topo-env-head {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 14px; display: flex; align-items: center;
+  gap: 8px; justify-content: center; flex-wrap: wrap; text-align: center;
+}
+.topo-env-head img { width: 18px; height: 18px; }
+.node.plain { background: var(--bg-alt); }
+
 /* ---------- Module list ---------- */
 .modlist { display: flex; flex-direction: column; gap: 12px; }
 .mod {

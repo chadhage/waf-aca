@@ -118,26 +118,99 @@
       <p class="kicker">Reference topology</p>
       <h2 class="section-title">What you will build toward</h2>
       <p class="section-sub">A production-shaped Container Apps environment with private data, controlled edge, and least-privilege identity.</p>
-      <div class="arch">Internet
-   │
-[ Azure Front Door + WAF ]
-   │  (TLS)
-┌──┴─────────────────────────────────────────────┐
-│  Container Apps environment  (workload profiles │
-│  v2, zone-redundant, VNet-injected)             │
-│                                                 │
-│   [order-api]  external ingress ─┐              │
-│        │ managed identity        │ traffic split│
-│   [catalog]    internal ingress  │  90 / 10     │
-│        │                          └── revisions  │
-│   [worker]     no ingress ◄── Service Bus (KEDA) │
-│   [reconcile]  scheduled job                     │
-└───────┬───────────────┬──────────────┬──────────┘
-        │               │              │
-   Key Vault        PostgreSQL   Azure Container
- (Secrets User)     (private)       Registry (AcrPull)
-        │
-   Log Analytics ◄── console + system logs (KQL, alerts)</div>
+      <div class="topology">
+
+        <!-- Edge -->
+        <div class="topo-tier">
+          <p class="topo-caption">Internet &rarr; controlled edge</p>
+          <div class="topo-row">
+            <div class="node accent">
+              <img src="assets/azure-icons/front-door.svg" alt="Azure Front Door" width="40" height="40" loading="lazy">
+              <span class="n-title">Front Door</span>
+              <span class="n-sub">global edge &middot; TLS</span>
+            </div>
+            <div class="node accent">
+              <img src="assets/azure-icons/waf.svg" alt="Web Application Firewall policy" width="40" height="40" loading="lazy">
+              <span class="n-title">WAF policy</span>
+              <span class="n-sub">OWASP rules</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="topo-flow" aria-hidden="true">&darr;<small>TLS</small></div>
+
+        <!-- Container Apps environment -->
+        <div class="topo-tier">
+          <div class="topo-env">
+            <p class="topo-env-head">
+              <img src="assets/azure-icons/virtual-network.svg" alt="" width="18" height="18" loading="lazy">
+              Container Apps environment &middot; VNet-injected &middot; zone-redundant &middot; workload profiles
+            </p>
+            <div class="topo-row">
+              <div class="node plain">
+                <img src="assets/azure-icons/container-apps-env.svg" alt="order-api container app" width="40" height="40" loading="lazy">
+                <span class="n-title">order-api</span>
+                <span class="n-sub">external ingress<br>MI &middot; 90/10 split</span>
+              </div>
+              <div class="node plain">
+                <img src="assets/azure-icons/container-apps-env.svg" alt="catalog container app" width="40" height="40" loading="lazy">
+                <span class="n-title">catalog</span>
+                <span class="n-sub">internal ingress</span>
+              </div>
+              <div class="node plain">
+                <img src="assets/azure-icons/worker-container.svg" alt="worker container app" width="40" height="40" loading="lazy">
+                <span class="n-title">worker</span>
+                <span class="n-sub">no ingress<br>KEDA scaled</span>
+              </div>
+              <div class="node plain">
+                <img src="assets/azure-icons/worker-container.svg" alt="reconcile scheduled job" width="40" height="40" loading="lazy">
+                <span class="n-title">reconcile</span>
+                <span class="n-sub">scheduled job</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="topo-flow" aria-hidden="true">&darr;<small>private &middot; least privilege</small></div>
+
+        <!-- Backing services -->
+        <div class="topo-tier">
+          <p class="topo-caption">Backing services</p>
+          <div class="topo-row">
+            <div class="node">
+              <img src="assets/azure-icons/key-vault.svg" alt="Azure Key Vault" width="40" height="40" loading="lazy">
+              <span class="n-title">Key Vault</span>
+              <span class="n-sub">Secrets User</span>
+            </div>
+            <div class="node">
+              <img src="assets/azure-icons/postgresql.svg" alt="Azure Database for PostgreSQL" width="40" height="40" loading="lazy">
+              <span class="n-title">PostgreSQL</span>
+              <span class="n-sub">private access</span>
+            </div>
+            <div class="node">
+              <img src="assets/azure-icons/container-registry.svg" alt="Azure Container Registry" width="40" height="40" loading="lazy">
+              <span class="n-title">Container Registry</span>
+              <span class="n-sub">AcrPull</span>
+            </div>
+            <div class="node">
+              <img src="assets/azure-icons/service-bus.svg" alt="Azure Service Bus" width="40" height="40" loading="lazy">
+              <span class="n-title">Service Bus</span>
+              <span class="n-sub">KEDA &rarr; worker</span>
+            </div>
+            <div class="node">
+              <img src="assets/azure-icons/managed-identity.svg" alt="Azure Managed Identity" width="40" height="40" loading="lazy">
+              <span class="n-title">Managed identity</span>
+              <span class="n-sub">workload auth</span>
+            </div>
+            <div class="node">
+              <img src="assets/azure-icons/log-analytics.svg" alt="Log Analytics workspace" width="40" height="40" loading="lazy">
+              <span class="n-title">Log Analytics</span>
+              <span class="n-sub">logs &middot; KQL &middot; alerts</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </section>
 
