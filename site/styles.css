@@ -240,6 +240,41 @@ section { padding: 46px 0; }
 .topo-env-head img { width: 18px; height: 18px; }
 .node.plain { background: var(--bg-alt); }
 
+/* ---------- Landing zone placement ---------- */
+.lz-tag {
+  display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono);
+  font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 999px; margin: 0 0 12px;
+}
+.lz-tag.hub { color: var(--accent); background: var(--accent-soft); border: 1px solid rgba(74, 168, 255, 0.35); }
+.lz-tag.spoke { color: var(--good); background: rgba(67, 209, 122, 0.12); border: 1px solid rgba(67, 209, 122, 0.35); }
+.lz-card h3 { margin: 0 0 4px; font-size: 1.1rem; }
+.lz-card .lz-scope { color: var(--text-faint); font-family: var(--mono); font-size: 12px; margin: 0 0 14px; }
+.lz-list { list-style: none; margin: 0; padding: 0; }
+.lz-list li { padding: 9px 0; border-top: 1px solid var(--border-soft); font-size: 14px; color: var(--text-dim); }
+.lz-list li:first-child { border-top: 0; }
+.lz-list li strong { color: var(--text); font-weight: 600; }
+.lz-list li span { display: block; color: var(--text-faint); font-size: 12.5px; margin-top: 2px; }
+
+.placement-scroll { overflow-x: auto; margin-top: 6px; border-radius: var(--radius-sm); border: 1px solid var(--border-soft); }
+.placement { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 560px; }
+.placement th, .placement td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+.placement thead th { background: var(--bg-alt); font-family: var(--mono); font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-faint); }
+.placement tbody tr:last-child td { border-bottom: 0; }
+.placement td strong { color: var(--text); }
+.placement td .why { color: var(--text-faint); }
+.zone-badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-family: var(--mono); white-space: nowrap; }
+.zone-badge.hub { color: var(--accent); background: var(--accent-soft); }
+.zone-badge.spoke { color: var(--good); background: rgba(67, 209, 122, 0.12); }
+.zone-badge.either { color: var(--l400); background: rgba(246, 165, 74, 0.14); }
+.lz-refs { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; padding: 0; list-style: none; }
+.lz-refs a {
+  display: inline-block; font-size: 12.5px; font-family: var(--mono);
+  padding: 6px 12px; border-radius: 999px; text-decoration: none;
+  color: var(--text-dim); background: var(--surface); border: 1px solid var(--border-soft);
+}
+.lz-refs a:hover { color: var(--accent); border-color: var(--accent); }
+
 /* ---------- Module list ---------- */
 .modlist { display: flex; flex-direction: column; gap: 12px; }
 .mod {

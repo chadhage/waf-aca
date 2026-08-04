@@ -214,6 +214,165 @@
     </div>
   </section>
 
+  <!-- Landing zone placement -->
+  <section id="landing-zone">
+    <div class="wrap">
+      <p class="kicker">Enterprise context</p>
+      <h2 class="section-title">Where this workload sits in a platform landing zone</h2>
+      <p class="section-sub">
+        An Azure landing zone has two halves: a <strong>platform landing zone</strong> (the centralized hub/platform
+        subscriptions that provide connectivity, identity, governance, and shared monitoring) and
+        <strong>application landing zones</strong> (the workload spoke subscriptions where teams deploy inside the
+        platform's guardrails). This Container Apps workload is an application landing zone that peers into the platform
+        hub &mdash; it consumes central services rather than re-creating them.
+      </p>
+
+      <div class="grid-2">
+        <div class="card lz-card">
+          <span class="lz-tag hub">Platform landing zone</span>
+          <h3>Hub &amp; platform subscriptions</h3>
+          <p class="lz-scope">Owned by the platform team &middot; shared by every workload</p>
+          <ul class="lz-list">
+            <li><strong>Connectivity:</strong> hub VNet, Azure Firewall / egress control, ExpressRoute &amp; VPN gateways, Azure DDoS Protection
+              <span>Central inspection and hybrid connectivity shared across all spokes.</span></li>
+            <li><strong>Private DNS zones</strong> (<code>privatelink.*</code>)
+              <span>Resolved centrally so every spoke reaches private endpoints consistently.</span></li>
+            <li><strong>Identity:</strong> Microsoft Entra, domain services
+              <span>The primary security boundary for the whole tenant.</span></li>
+            <li><strong>Management &amp; security:</strong> central Log Analytics, Microsoft Sentinel, Defender for Cloud, Azure Policy
+              <span>Platform + security telemetry, SIEM, and governance guardrails.</span></li>
+            <li><strong>Governance:</strong> management group hierarchy, subscription vending
+              <span>A repeatable way to hand workload teams a compliant landing zone.</span></li>
+          </ul>
+        </div>
+
+        <div class="card lz-card">
+          <span class="lz-tag spoke">Application landing zone</span>
+          <h3>Workload spoke subscription</h3>
+          <p class="lz-scope">Owned by the workload team &middot; deployed within platform guardrails</p>
+          <ul class="lz-list">
+            <li><strong>Spoke VNet + delegated subnet</strong>, peered to the hub
+              <span>Workload network that routes egress through the platform firewall.</span></li>
+            <li><strong>Container Apps environment</strong> (VNet-injected, zone-redundant)
+              <span>The workload runtime and its network + security boundary.</span></li>
+            <li><strong>Key Vault, PostgreSQL, storage</strong> + private endpoints
+              <span>Workload-owned data and secrets, reached privately over the spoke.</span></li>
+            <li><strong>User-assigned managed identities</strong> and RBAC scope
+              <span>Least-privilege workload identity to its own resources only.</span></li>
+            <li><strong>App-scoped Log Analytics</strong> (can forward to the central workspace)
+              <span>Application diagnostics owned and queried by the team.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="card-title-sm">Component-by-component placement</h3>
+      <div class="placement-scroll">
+        <table class="placement">
+          <thead>
+            <tr><th>Architecture component</th><th>Lands in</th><th>Why</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Front Door + WAF</strong> (global edge)</td>
+              <td><span class="zone-badge either">Hub or workload</span></td>
+              <td class="why">Shared platform edge with central WAF policy and certs when many workloads share ingress; a single-tenant workload may own its own profile.</td>
+            </tr>
+            <tr>
+              <td><strong>Azure Firewall / egress, gateways, DDoS</strong></td>
+              <td><span class="zone-badge hub">Hub</span></td>
+              <td class="why">Central egress inspection and hybrid connectivity are shared across every spoke.</td>
+            </tr>
+            <tr>
+              <td><strong>Private DNS zones</strong> (<code>privatelink.*</code>)</td>
+              <td><span class="zone-badge hub">Hub</span></td>
+              <td class="why">Centralized so all spokes resolve private endpoints the same way.</td>
+            </tr>
+            <tr>
+              <td><strong>Central Log Analytics, Sentinel, Policy</strong></td>
+              <td><span class="zone-badge hub">Hub</span></td>
+              <td class="why">Platform + security monitoring, SIEM, and governance belong to the platform team.</td>
+            </tr>
+            <tr>
+              <td><strong>Spoke VNet + ACA delegated subnet</strong></td>
+              <td><span class="zone-badge spoke">Spoke</span></td>
+              <td class="why">The workload's own network, peered to the hub for shared egress.</td>
+            </tr>
+            <tr>
+              <td><strong>Container Apps environment</strong></td>
+              <td><span class="zone-badge spoke">Spoke</span></td>
+              <td class="why">It is the workload runtime plus its network and security isolation boundary.</td>
+            </tr>
+            <tr>
+              <td><strong>Container Registry</strong></td>
+              <td><span class="zone-badge either">Spoke or shared</span></td>
+              <td class="why">Per-workload for strict isolation, or one central Premium ACR consumed by many teams.</td>
+            </tr>
+            <tr>
+              <td><strong>Key Vault, PostgreSQL, private endpoints</strong></td>
+              <td><span class="zone-badge spoke">Spoke</span></td>
+              <td class="why">Workload-owned secrets and data, accessed privately within the spoke.</td>
+            </tr>
+            <tr>
+              <td><strong>Managed identities &amp; RBAC</strong></td>
+              <td><span class="zone-badge spoke">Spoke</span></td>
+              <td class="why">Workload identity scoped least-privilege to its own resources.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="card-title-sm">Scaling to a multi-ACA fleet</h3>
+      <p class="card-copy">
+        When several business units or workloads run Container Apps side by side, give each its own application landing
+        zone (subscription + environment) and share only what the platform can govern centrally. The Container Apps
+        environment is the isolation, network, and billing boundary &mdash; so it follows the trust boundary.
+      </p>
+
+      <div class="grid-2">
+        <div class="card lz-card">
+          <span class="lz-tag hub">Share across the fleet</span>
+          <h3>One set for the whole platform</h3>
+          <ul class="lz-list">
+            <li><strong>Hub networking, Azure Firewall egress, gateways, DDoS</strong>
+              <span>Central inspection and connectivity every spoke peers into.</span></li>
+            <li><strong>Private DNS zones</strong>
+              <span>Consistent private-endpoint resolution across all workloads.</span></li>
+            <li><strong>Central monitoring &amp; governance:</strong> Log Analytics, Sentinel, Defender, Policy, subscription vending
+              <span>Uniform security posture and a repeatable landing-zone pipeline.</span></li>
+            <li><strong>Optionally one Premium, geo-replicated ACR</strong>
+              <span>Per-team scoped tokens/RBAC, private endpoints, and image scanning + signing standardize the supply chain and cut cost.</span></li>
+            <li><strong>Optionally one Azure Front Door</strong>
+              <span>Per-route and per-BU WAF policies behind a single global edge.</span></li>
+          </ul>
+        </div>
+
+        <div class="card lz-card">
+          <span class="lz-tag spoke">Keep per workload / BU</span>
+          <h3>One set per application landing zone</h3>
+          <ul class="lz-list">
+            <li><strong>Container Apps environment</strong>
+              <span>Same team + same trust boundary can co-locate apps via workload profiles; different BUs or compliance scopes get separate environments.</span></li>
+            <li><strong>Spoke VNet + delegated subnet</strong>
+              <span>Network isolation and independent address space per workload.</span></li>
+            <li><strong>Key Vault, databases, storage</strong>
+              <span>Blast-radius and data ownership stay inside the workload.</span></li>
+            <li><strong>Managed identities and RBAC scope</strong>
+              <span>Identity separation so one BU can never reach another's resources.</span></li>
+            <li><strong>App secrets/config, app-scoped Log Analytics, CI/CD identity</strong>
+              <span>Independent release cadence and diagnostics per team.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <ul class="lz-refs">
+        <li><a href="https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/" target="_blank" rel="noopener">What is an Azure landing zone?</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/design-areas" target="_blank" rel="noopener">Landing zone design areas</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/design-area/subscription-vending" target="_blank" rel="noopener">Subscription vending</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/azure/architecture/landing-zones/landing-zone-deploy" target="_blank" rel="noopener">Application landing zone accelerators</a></li>
+      </ul>
+    </div>
+  </section>
+
   <!-- Modules -->
   <section id="modules">
     <div class="wrap">
