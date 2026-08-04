@@ -8,6 +8,9 @@
 
   var ISSUE = 25;
   var PASS = 80;
+  var CATEGORY_PASS = 60;
+  var MIN_SCENARIOS = Math.ceil(ISSUE * 0.60);
+  var RESULT_KEY = "waaca-quiz-result";
 
   var meta, categories, bank;
   var quiz = [];
@@ -45,6 +48,14 @@
     return a;
   }
 
+  function randomizeOptions(question) {
+    var indexes = shuffle(question.options.map(function (_, index) { return index; }));
+    return Object.assign({}, question, {
+      options: indexes.map(function (index) { return question.options[index]; }),
+      correctIndex: indexes.indexOf(question.correctIndex)
+    });
+  }
+
   // Build a weighted, category-balanced selection of ISSUE questions.
   function buildQuiz() {
     var byCat = {};
@@ -72,7 +83,25 @@
       selected.push(remaining.pop());
     }
     selected = shuffle(selected).slice(0, ISSUE);
-    return selected;
+
+    // Preserve category weights while ensuring the issued set is at least 60% scenarios.
+    var scenarioCount = selected.filter(function (q) { return q.scenario; }).length;
+    if (scenarioCount < MIN_SCENARIOS) {
+      selected.forEach(function (question, index) {
+        if (scenarioCount >= MIN_SCENARIOS || question.scenario) return;
+        var replacement = bank.find(function (candidate) {
+          return candidate.scenario && candidate.category === question.category &&
+            !selected.some(function (issued) { return issued.id === candidate.id; });
+        });
+        if (replacement) {
+          selected[index] = replacement;
+          scenarioCount++;
+        }
+      });
+    }
+
+    if (scenarioCount < MIN_SCENARIOS) throw new Error("Question bank cannot satisfy scenario coverage");
+    return shuffle(selected).map(randomizeOptions);
   }
 
   function catName(key) { return (categories && categories[key]) || key; }
@@ -149,7 +178,11 @@
     });
 
     var pct = Math.round((correctCount / quiz.length) * 100);
-    var pass = pct >= PASS;
+    var categoryPass = Object.keys(perCat).every(function (cat) {
+      var score = perCat[cat];
+      return Math.round((score.correct / score.total) * 100) >= CATEGORY_PASS;
+    });
+    var pass = pct >= PASS && categoryPass;
 
     var catRows = Object.keys(perCat).map(function (cat) {
       var c = perCat[cat];
@@ -166,14 +199,20 @@
       '<div class="score-ring" style="--pct:' + pct + '%"><span>' + pct + "%</span></div>" +
       '<div class="verdict">' + (pass ? "Passed — competency demonstrated" : "Not yet — keep going") + "</div>" +
       '<p style="color:var(--text-dim)">You answered ' + correctCount + " of " + quiz.length +
-      " correctly. The certification gate is " + PASS + "%" +
-      (pass ? "." : ", and each category should reach at least 60%.") + "</p>" +
+      " correctly. The knowledge gate is " + PASS + "% overall and " + CATEGORY_PASS + "% in every category." +
+      (pct >= PASS && !categoryPass ? " Your overall score passed, but at least one category did not." : "") + "</p>" +
       '<div class="cat-breakdown"><h3 style="font-size:1rem;margin:0 0 8px">Category breakdown</h3>' + catRows + "</div>" +
       '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px">' +
       '<button class="btn btn-primary" id="retry-kc">Take a new randomized set →</button>' +
       '<a class="btn btn-ghost" href="lab.html">Review the lab guide</a></div>';
 
     el.progress.style.width = "100%";
+    localStorage.setItem(RESULT_KEY, JSON.stringify({
+      completedAtUtc: new Date().toISOString(),
+      score: pct,
+      categoryMinimumMet: categoryPass,
+      passed: pass
+    }));
     document.getElementById("retry-kc").addEventListener("click", startQuiz);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -205,6 +244,8 @@
         meta = data.meta;
         categories = data.categories;
         bank = data.questions;
+        el.start.textContent = "Start the check →";
+        el.start.disabled = false;
       })
       .catch(function () {
         el.start.textContent = "Could not load questions — serve over HTTP";

@@ -1,7 +1,7 @@
 /* ============================================================
    Lab guide rendering + progress tracking.
    Reads modules.json, respects the delivery mode, persists
-   activity completion and evidence checkboxes in localStorage.
+  structured evidence records in localStorage.
    ============================================================ */
 (function () {
   "use strict";
@@ -15,7 +15,6 @@
   var modeIndicator = document.getElementById("mode-indicator");
 
   var MODULES = [];
-  var totalActivities = 0;
 
   /* ---------- progress store ---------- */
   function loadProgress() {
@@ -24,6 +23,20 @@
   }
   function saveProgress(p) { localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); }
   var progress = loadProgress();
+
+  function recordFor(id) {
+    var record = progress[id] || {};
+    return {
+      artifact: record.artifact || "",
+      observation: record.observation || "",
+      source: record.source || "",
+      attested: record.attested === true
+    };
+  }
+
+  function recordComplete(record) {
+    return !!(record.attested && record.artifact.trim() && record.observation.trim() && record.source.trim());
+  }
 
   function esc(s) {
     return String(s == null ? "" : s)
@@ -44,8 +57,9 @@
   }
 
   function renderActivity(mod, act) {
-    var done = !!(progress[act.id] && progress[act.id].done);
-    var evidenceChecked = !!(progress[act.id] && progress[act.id].evidence);
+    var record = recordFor(act.id);
+    var done = recordComplete(record);
+    var fieldsComplete = !!(record.artifact.trim() && record.observation.trim() && record.source.trim());
 
     var parts = [];
     parts.push(stepGroup("Pre-check", null, "<p>" + esc(act.precheck) + "</p>"));
@@ -58,7 +72,7 @@
       stepGroup("Validation gate", null, "<p>" + esc(act.validation) + "</p>") +
       "</div>"
     );
-    parts.push('<div class="evidence-box">📁 Evidence to capture: ' + esc(act.evidence) + "</div>");
+    parts.push('<div class="evidence-box">Evidence to capture: ' + esc(act.evidence) + "</div>");
 
     // Instructor-only block (CSS hides it in self mode)
     if (act.talkTrack) {
@@ -77,20 +91,27 @@
     }
 
     parts.push(
-      '<label class="evidence-toggle">' +
-      '<input type="checkbox" data-evidence="' + act.id + '"' + (evidenceChecked ? " checked" : "") + " />" +
-      " I have captured and saved the evidence for this activity</label>"
+      '<fieldset class="evidence-record"><legend>Validation evidence record</legend>' +
+      '<label>Artifact path or URI<input type="text" data-record="artifact" data-activity="' + act.id +
+      '" value="' + esc(record.artifact) + '" placeholder="evidence/… or approved repository URI" /></label>' +
+      '<label>Observed result<textarea data-record="observation" data-activity="' + act.id +
+      '" rows="3" placeholder="Timestamp, actual result, and interpretation">' + esc(record.observation) + "</textarea></label>" +
+      '<label>Microsoft source URL<input type="url" data-record="source" data-activity="' + act.id +
+      '" value="' + esc(record.source) + '" placeholder="https://learn.microsoft.com/…" /></label>' +
+      '<label class="evidence-toggle"><input type="checkbox" data-attest="' + act.id + '"' +
+      (record.attested ? " checked" : "") + (fieldsComplete ? "" : " disabled") +
+      " /> I attest that the artifact contains the stated machine-readable result</label></fieldset>"
     );
 
     return (
       '<div class="activity' + (done ? " completed" : "") + '" id="' + act.id + '">' +
-      '<div class="act-head" data-toggle="' + act.id + '">' +
-      '<span class="act-check" data-check="' + act.id + '">✓</span>' +
+      '<button type="button" class="act-head" data-toggle="' + act.id + '" aria-expanded="false" aria-controls="' + act.id + '-body">' +
+      '<span class="act-check" aria-hidden="true">✓</span>' +
       '<span class="act-title">' + esc(act.title) + "</span>" +
       '<span class="act-time">' + esc(act.time) + "</span>" +
-      '<span class="chev">▶</span>' +
-      "</div>" +
-      '<div class="act-body">' + parts.join("") + "</div>" +
+      '<span class="chev" aria-hidden="true">▶</span>' +
+      "</button>" +
+      '<div class="act-body" id="' + act.id + '-body">' + parts.join("") + "</div>" +
       "</div>"
     );
   }
@@ -127,27 +148,45 @@
   function completedCount() {
     return MODULES.reduce(function (sum, m) {
       return sum + m.activities.filter(function (a) {
-        return progress[a.id] && progress[a.id].done;
+        return recordComplete(recordFor(a.id));
       }).length;
     }, 0);
   }
 
   function moduleComplete(m) {
-    return m.activities.every(function (a) { return progress[a.id] && progress[a.id].done; });
+    return m.activities.every(function (a) { return recordComplete(recordFor(a.id)); });
+  }
+
+  function modulePercent(m) {
+    var complete = m.activities.filter(function (a) { return recordComplete(recordFor(a.id)); }).length;
+    return m.activities.length ? (complete / m.activities.length) * 100 : 0;
+  }
+
+  function weightedScore() {
+    return MODULES.reduce(function (sum, m) {
+      return sum + (m.domainPoints * modulePercent(m) / 100);
+    }, 0);
   }
 
   function updateMeter() {
     var done = completedCount();
-    var pct = totalActivities ? Math.round((done / totalActivities) * 100) : 0;
+    var totalActivities = MODULES.reduce(function (sum, m) { return sum + m.activities.length; }, 0);
+    var pct = Math.round(weightedScore());
+    var domainMinimumsMet = MODULES.every(function (m) { return modulePercent(m) >= 60; });
+    var capstone = MODULES.find(function (m) { return m.id === "m7"; });
+    var capstoneComplete = !!(capstone && moduleComplete(capstone));
+    var ready = pct >= 80 && domainMinimumsMet && capstoneComplete;
     meterFill.style.width = pct + "%";
     meterPct.textContent = pct + "%";
-    meterFill.classList.toggle("pass", pct >= 80);
-    if (pct >= 100) {
-      meterHint.textContent = "All activities complete. Take the knowledge check to certify.";
-    } else if (pct >= 80) {
-      meterHint.textContent = "You have cleared the 80% activity gate. Finish the capstone and knowledge check.";
+    meterFill.classList.toggle("pass", ready);
+    if (ready) {
+      meterHint.textContent = "Readiness gate met. Export evidence, pass the knowledge check, and schedule live assessor verification.";
+    } else if (pct >= 80 && !capstoneComplete) {
+      meterHint.textContent = "Weighted score is sufficient, but the individual capstone is mandatory.";
+    } else if (pct >= 80 && !domainMinimumsMet) {
+      meterHint.textContent = "Weighted score is sufficient, but every domain must reach 60%.";
     } else {
-      meterHint.textContent = "Complete every activity to reach the 80% gate (" + done + "/" + totalActivities + ").";
+      meterHint.textContent = "Weighted readiness: " + done + "/" + totalActivities + " evidence records complete; capstone and 60% per domain required.";
     }
 
     // rail states
@@ -169,15 +208,24 @@
   /* ---------- events ---------- */
   function toggleActivity(id) {
     var el = document.getElementById(id);
-    if (el) el.classList.toggle("open");
+    if (!el) return;
+    var open = el.classList.toggle("open");
+    var head = el.querySelector(".act-head");
+    if (head) head.setAttribute("aria-expanded", String(open));
   }
 
-  function setDone(id, done) {
-    progress[id] = progress[id] || {};
-    progress[id].done = done;
-    saveProgress(progress);
+  function refreshActivity(id) {
+    var record = recordFor(id);
+    var complete = recordComplete(record);
     var el = document.getElementById(id);
-    if (el) el.classList.toggle("completed", done);
+    if (el) el.classList.toggle("completed", complete);
+    var attest = document.querySelector('[data-attest="' + id + '"]');
+    var fieldsComplete = !!(record.artifact.trim() && record.observation.trim() && record.source.trim());
+    if (attest) {
+      attest.disabled = !fieldsComplete;
+      attest.checked = record.attested;
+    }
+    saveProgress(progress);
     updateMeter();
   }
 
@@ -185,27 +233,46 @@
     content.addEventListener("click", function (e) {
       var head = e.target.closest(".act-head");
       if (!head) return;
-      var id = head.getAttribute("data-toggle");
-      // clicking the check toggles completion; clicking elsewhere expands
-      if (e.target.closest(".act-check")) {
-        e.stopPropagation();
-        var cur = !!(progress[id] && progress[id].done);
-        setDone(id, !cur);
-        return;
+      toggleActivity(head.getAttribute("data-toggle"));
+    });
+
+    content.addEventListener("input", function (e) {
+      var field = e.target.closest("[data-record]");
+      if (!field) return;
+      var id = field.getAttribute("data-activity");
+      progress[id] = recordFor(id);
+      progress[id][field.getAttribute("data-record")] = field.value;
+      if (!progress[id].artifact.trim() || !progress[id].observation.trim() || !progress[id].source.trim()) {
+        progress[id].attested = false;
       }
-      toggleActivity(id);
+      refreshActivity(id);
     });
 
     content.addEventListener("change", function (e) {
-      var cb = e.target.closest("[data-evidence]");
-      if (!cb) return;
-      var id = cb.getAttribute("data-evidence");
-      progress[id] = progress[id] || {};
-      progress[id].evidence = cb.checked;
-      // capturing evidence also marks the activity done for convenience
-      if (cb.checked && !(progress[id] && progress[id].done)) setDone(id, true);
-      saveProgress(progress);
+      var attest = e.target.closest("[data-attest]");
+      if (!attest) return;
+      var id = attest.getAttribute("data-attest");
+      progress[id] = recordFor(id);
+      progress[id].attested = attest.checked;
+      refreshActivity(id);
     });
+  }
+
+  function exportEvidence() {
+    var payload = {
+      schemaVersion: 1,
+      generatedAtUtc: new Date().toISOString(),
+      deliveryMode: window.WAACA.getMode(),
+      weightedReadinessScore: Math.round(weightedScore()),
+      records: progress,
+      notice: "Browser records are unverified. An assessor must inspect artifacts and live Azure state."
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    var link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "waaca-evidence-record.json";
+    link.click();
+    URL.revokeObjectURL(link.href);
   }
 
   /* ---------- mode ---------- */
@@ -238,17 +305,17 @@
         if (!confirm("Reset all lab progress and evidence in this browser?")) return;
         progress = {};
         saveProgress(progress);
-        document.querySelectorAll(".activity.completed").forEach(function (a) { a.classList.remove("completed"); });
-        document.querySelectorAll("[data-evidence]").forEach(function (c) { c.checked = false; });
-        updateMeter();
+        location.reload();
       });
     }
+
+    var exportBtn = document.getElementById("export-evidence");
+    if (exportBtn) exportBtn.addEventListener("click", exportEvidence);
 
     fetch("data/modules.json")
       .then(function (r) { return r.json(); })
       .then(function (data) {
         MODULES = data.modules;
-        totalActivities = MODULES.reduce(function (s, m) { return s + m.activities.length; }, 0);
         content.innerHTML = MODULES.map(renderModule).join("");
         renderRail();
         bindEvents();
@@ -260,7 +327,7 @@
           var target = document.getElementById(hash);
           if (target) {
             target.scrollIntoView({ behavior: "smooth", block: "start" });
-            if (target.classList.contains("activity")) target.classList.add("open");
+            if (target.classList.contains("activity")) toggleActivity(hash);
           }
         }
       })

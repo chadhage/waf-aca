@@ -14,10 +14,10 @@
   }
   function applyTheme(t) {
     document.documentElement.setAttribute("data-theme", t);
-    var btn = document.querySelector("[data-theme-toggle]");
-    if (btn) {
-      btn.querySelector("[data-theme-label]").textContent = t === "dark" ? "Light" : "Dark";
-    }
+    document.querySelectorAll("[data-theme-toggle]").forEach(function (btn) {
+      var label = btn.querySelector("[data-theme-label]");
+      if (label) label.textContent = t === "dark" ? "Light" : "Dark";
+    });
   }
   function toggleTheme() {
     var next = getTheme() === "dark" ? "light" : "dark";
@@ -52,6 +52,16 @@
     });
   }
 
+  /* ---------- Mobile navigation ---------- */
+  function setMenuOpen(open) {
+    var topbar = document.querySelector(".topbar");
+    var toggle = document.querySelector("[data-menu-toggle]");
+    if (!topbar || !toggle) return;
+    topbar.classList.toggle("menu-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+  }
+
   /* ---------- Expose ---------- */
   window.WAACA = {
     getMode: getMode,
@@ -66,7 +76,30 @@
     document.body.setAttribute("data-mode", getMode());
     markActiveNav();
 
-    var toggle = document.querySelector("[data-theme-toggle]");
-    if (toggle) toggle.addEventListener("click", toggleTheme);
+    document.querySelectorAll("[data-theme-toggle]").forEach(function (toggle) {
+      toggle.addEventListener("click", toggleTheme);
+    });
+
+    var menuToggle = document.querySelector("[data-menu-toggle]");
+    if (menuToggle) {
+      menuToggle.addEventListener("click", function () {
+        setMenuOpen(menuToggle.getAttribute("aria-expanded") !== "true");
+      });
+      document.querySelectorAll("#site-menu a").forEach(function (link) {
+        link.addEventListener("click", function () { setMenuOpen(false); });
+      });
+      document.addEventListener("click", function (event) {
+        if (!event.target.closest(".topbar")) setMenuOpen(false);
+      });
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          setMenuOpen(false);
+          menuToggle.focus();
+        }
+      });
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 900) setMenuOpen(false);
+      });
+    }
   });
 })();

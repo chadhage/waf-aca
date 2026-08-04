@@ -1,6 +1,6 @@
 # Azure Well-Architected for Azure Container Apps
 
-**Official-source review date:** 2026-08-03
+**Official-source review date:** 2026-08-04
 
 This is an instructor-led, level-400 workshop for architects, platform engineers, SREs, security engineers, and senior developers. Participants design, deploy, secure, operate, test, and defend an Azure Container Apps (ACA) workload. Completion requires **80/100**, minimum domain scores, and observable practical evidence.
 
@@ -32,6 +32,7 @@ This is an instructor-led, level-400 workshop for architects, platform engineers
 - [How to use ACA](#how-to-use-aca)
   - [Getting-started tutorial](#getting-started-tutorial)
   - [Advanced scenarios](#advanced-scenarios)
+  - [Azure Functions on Container Apps](#azure-functions-on-container-apps)
   - [Well-Architected best practices](#well-architected-best-practices)
   - [Enterprise scale](#enterprise-scale)
 - [Contoso greenfield case study](#contoso-greenfield-case-study)
@@ -55,6 +56,7 @@ A successful participant can independently:
 5. Define SLOs, test capacity and failures, diagnose incidents, and prove recovery from telemetry.
 6. Model total cost and make explicit tradeoffs across the five Well-Architected pillars.
 7. Design regional placement, residency, disaster recovery, policy, and enterprise platform ownership.
+8. Build and operate a native Azure Function App in an ACA environment with host storage, identity-based triggers, trigger-derived scaling, and revision-safe event processing.
 
 ### Empirical 80% gate
 
@@ -81,7 +83,7 @@ Certification requires:
 
 ## Workshop format
 
-Recommended delivery is three days (21 hours) plus pre-work.
+Recommended delivery is three days (24 hours) plus pre-work.
 
 | Module | Duration | Evidence |
 | --- | ---: | --- |
@@ -91,10 +93,17 @@ Recommended delivery is three days (21 hours) plus pre-work.
 | Scaling, resilience, performance | 3 h | Load graphs and SLO result |
 | Delivery and observability | 3 h | Canary, rollback, query, alert |
 | Enterprise architecture and cost | 2 h | Platform and cost model |
+| Azure Functions on Container Apps | 3 h | Native Function App, trigger scaling, fault recovery |
 | Case studies and catalog | 2 h | Design/migration decisions |
 | Individual capstone | 3 h | Rubric artifacts and defense |
 
 Instructional labs may use pairs. All certification evidence is individual. Give each participant a resource group, budget, quota boundary, and cleanup policy.
+
+### Repository assets
+
+The repository includes a non-root sample API and Dockerfile in `workshop/app`, a digest-parameterized Bicep starter in `workshop/infra`, a k6 baseline/peak test in `workshop/load`, and a tested TypeScript v4 Functions custom-image sample in `workshop/functions`. Evidence and assessor materials are under `workshop/evidence` and `workshop/assessor`. Catalog fixtures and executable admission controls are under `workshop/catalog` and `scripts/validate-catalog-request.mjs`. These are starting points for the labs, not a production landing zone. Run `node scripts/validate-content.mjs` and `npm test --prefix workshop/functions` before delivery; the Pages workflow runs both checks.
+
+Browser progress is an unverified readiness record. Export it from the lab guide, run `node scripts/validate-evidence-record.mjs <export.json>`, and submit it with the referenced machine-readable artifacts. Only an assessor who verifies those artifacts and live Azure state can issue a workshop result.
 
 ### Delivery contract for every module
 
@@ -134,7 +143,9 @@ evidence/
   05-delivery/         # image digest, revision traffic, canary gates and rollback
   06-observability/    # KQL, metrics, trace correlation, alert and action result
   07-cost/             # assumptions, calculator export and observed utilization
-  08-capstone/         # assessor transcript, artifacts and oral defense notes
+  07-functions/        # hosting ADR, deployment, scale/fault timeline, revision safety
+  08-case-studies/     # greenfield, migration, and catalog decisions
+  09-capstone/         # assessor transcript, artifacts and oral defense notes
 ```
 
 Evidence must include commands or IaC, UTC timestamps, expected result, actual result, interpretation, and source URL. Screenshots may supplement but never replace machine-readable output. Redact subscription IDs, tenant IDs, internal names, user identities, IP addresses, and sensitive payloads before sharing.
@@ -225,6 +236,7 @@ Do not create an environment per app without a boundary requirement, and do not 
 | AKS | Kubernetes ecosystem, controllers, scheduling, service mesh, platform control | Team cannot own cluster security, upgrades, capacity, policy, and operations |
 | App Service | Conventional web/API hosting and mature web deployment features | Event-driven multi-service topology and KEDA are central |
 | Functions | Trigger/binding programming model and function-oriented handlers | Existing containerized service needs process-level control |
+| Functions on ACA | Functions programming model plus an existing ACA environment's networking, workload profiles, or colocated services | Standard Functions hosting meets the requirements more simply |
 | Container Instances | Simple isolated or transient container execution | Need revisions, service discovery, ingress, and autoscaling platform |
 | ACA Jobs | Manual, scheduled, or event-triggered finite execution | Process must continuously serve traffic |
 
@@ -241,6 +253,46 @@ Selection tutorial:
 Use two reviewers. One checks technical elimination; the other checks team capability and total operating cost. Award no points for feature-count comparisons that fail to distinguish hard constraints from preferences.
 
 **Scenario drill:** classify each workload as app, job, another Azure service, or unresolved: public REST API, always-on queue listener, 30-minute scheduled close, one execution per large event, Windows service, privileged packet collector, untrusted code execution, and a controller requiring Kubernetes CRDs. Cite the Microsoft service statement and name the failure mode created by the wrong choice.
+
+### Azure Functions on Container Apps
+
+Native Azure Functions support lets a Function App run as a `Microsoft.App/containerApps` resource with `kind=functionapp` inside an existing Container Apps environment. Select it when both sides of that sentence matter: the workload benefits from Functions triggers and bindings, and it needs ACA environment capabilities such as shared private networking, workload profiles, Dapr integration, or proximity to containerized services. “Serverless” by itself is not a reason to prefer it over standard Functions hosting.
+
+The resource model adds Functions-specific responsibilities to familiar ACA boundaries:
+
+| Boundary | Design responsibility |
+| --- | --- |
+| Environment and workload profile | Network, compute isolation, capacity, observability destination, and shared blast radius |
+| Function App | `kind=functionapp`, Functions host version, image digest, identity, ingress, host storage, and replica bounds |
+| Trigger and binding | Connection prefix, identity and data-plane RBAC, retries, concurrency, poison-message policy, and generated KEDA rule |
+| Revision | Immutable app configuration; pull-trigger revisions can compete for the same events even when HTTP traffic weights differ |
+| Invocation | At-least-once-safe business behavior, correlation, timeout, and durable idempotency boundary |
+
+Every Function App requires host storage even when business state is external. Use a dedicated storage account or deliberately scoped account, secure it with identity and network controls, and capture its configuration as evidence. For concurrently active pull-trigger revisions, isolate host storage and event sources unless competing consumers are an explicit design decision. HTTP traffic weights do not partition queue or event-stream messages.
+
+Functions derives KEDA scaling rules from supported trigger configuration. Set bounded minimum and maximum replicas and measure cold start, queue age, drain time, dependency saturation, and return-to-idle behavior. Keep ingress enabled, internally or externally, because event-driven autoscaling on this hosting model depends on it. For Blob Storage trigger autoscaling, use Event Grid as the source. Override generated rules only when the team accepts ownership of the scaler contract and tests it explicitly.
+
+The sample under `workshop/functions` uses the TypeScript v4 programming model and registers an HTTP health function and a Service Bus queue function in code:
+
+```typescript
+app.serviceBusQueue("processOrder", {
+  connection: "ServiceBusConnection",
+  queueName: process.env.ORDERS_QUEUE_NAME ?? "orders",
+  handler: processOrder
+});
+```
+
+Configure the identity-based connection with `ServiceBusConnection__fullyQualifiedNamespace=<namespace>.servicebus.windows.net` and grant the runtime identity **Azure Service Bus Data Receiver** at the narrowest useful scope. Do not put a Service Bus connection string in source or evidence. The sample derives an idempotency key but intentionally leaves the durable atomic claim to the participant; process memory is not an idempotency store.
+
+Build, test, and publish the sample with an immutable image reference:
+
+```bash
+npm ci --prefix workshop/functions
+npm test --prefix workshop/functions
+az acr build --registry "$ACR_NAME" --image "functions-orders:$IMAGE_TAG" workshop/functions
+```
+
+The lab then deploys with `az containerapp create --kind functionapp --functions-version 4`, mandatory storage, ingress, managed identities, and replica bounds. Candidates must inspect effective state, process valid and malformed events, observe generated scaling, recover from a storage, RBAC, ingress, or poison-message fault, and defend their revision-isolation decision. See `workshop/functions/README.md` for the complete local and Azure workflow.
 
 ### Pricing
 
@@ -709,7 +761,7 @@ Before delivery, verify all features/regions, test under participant policy/netw
 
 Begin each module with a falsifiable hypothesis and end with evidence. Require predictions before experiments. Distinguish platform from application behavior and shared responsibility. Every team explains one failed experiment.
 
-Build at least 50 questions and issue 25 randomly: selection/architecture 16%, resource model 16%, networking/security 20%, scaling/performance/reliability 20%, delivery/operations 16%, and cost/geography/residency/compliance 12%. At least 60% are scenarios; avoid trivia about mutable defaults.
+Maintain at least 60 questions and issue 25 randomly: selection/architecture 12%, resource model 12%, networking/security 16%, scaling/performance/reliability 16%, delivery/operations 16%, cost/geography/residency/compliance 16%, and Functions on Container Apps 12%. At least 60% are scenarios; avoid trivia about mutable defaults.
 
 For every delivery, record a source-review manifest containing review date, page URL, page last-updated date when shown, verified claim, owner, and disposition. Re-run all labs in the approved region under participant-equivalent policy. Freeze known-good image digests and IaC versions for the cohort while leaving prices, quota allocations, and feature availability as explicit preflight checks.
 
@@ -739,6 +791,10 @@ Verify separately scoped role assignments, DNS, diagnostic settings, shared regi
 - [Revisions](https://learn.microsoft.com/azure/container-apps/revisions)
 - [Scaling](https://learn.microsoft.com/azure/container-apps/scale-app)
 - [Jobs](https://learn.microsoft.com/azure/container-apps/jobs)
+- [Azure Functions on Container Apps overview](https://learn.microsoft.com/azure/container-apps/functions-overview)
+- [Create and manage Functions on Container Apps](https://learn.microsoft.com/azure/container-apps/functions-usage)
+- [Azure Functions Service Bus trigger](https://learn.microsoft.com/azure/azure-functions/functions-bindings-service-bus-trigger)
+- [Azure Functions error handling and retries](https://learn.microsoft.com/azure/azure-functions/functions-bindings-error-pages)
 - [Managed identities](https://learn.microsoft.com/azure/container-apps/managed-identity)
 - [Health probes](https://learn.microsoft.com/azure/container-apps/health-probes)
 - [Observability](https://learn.microsoft.com/azure/container-apps/observability)

@@ -3,14 +3,15 @@
     "passThreshold": 80,
     "questionsToIssue": 25,
     "categoryWeights": {
-      "selection-architecture": 0.16,
-      "resource-model": 0.16,
-      "networking-security": 0.20,
-      "scaling-performance-reliability": 0.20,
+      "selection-architecture": 0.12,
+      "resource-model": 0.12,
+      "networking-security": 0.16,
+      "scaling-performance-reliability": 0.16,
       "delivery-operations": 0.16,
-      "cost-geography-compliance": 0.12
+      "cost-geography-compliance": 0.16,
+      "functions-on-container-apps": 0.12
     },
-    "sourceReviewDate": "2026-08-03"
+    "sourceReviewDate": "2026-08-04"
   },
   "categories": {
     "selection-architecture": "Service selection and architecture",
@@ -18,7 +19,8 @@
     "networking-security": "Networking and security",
     "scaling-performance-reliability": "Scaling, performance, reliability",
     "delivery-operations": "Delivery and operations",
-    "cost-geography-compliance": "Cost, geography, compliance"
+    "cost-geography-compliance": "Cost, geography, compliance",
+    "functions-on-container-apps": "Functions on Container Apps"
   },
   "questions": [
     {
@@ -99,8 +101,8 @@
     {
       "id": "q06",
       "category": "resource-model",
-      "scenario": false,
-      "stem": "Which environment type is the current default and provides the richer networking stack and multiple workload profiles?",
+      "scenario": true,
+      "stem": "A platform team is creating a new environment that needs Consumption and Dedicated profiles plus UDR support. Which environment type should it choose?",
       "options": [
         "Consumption-only environment",
         "Workload profiles environment",
@@ -109,13 +111,13 @@
       ],
       "correctIndex": 1,
       "explanation": "The workload profiles environment is the default and supports Consumption, Dedicated, and Flex (preview) profiles plus richer networking. Consumption-only is the legacy structure.",
-      "source": "https://learn.microsoft.com/en-us/azure/container-apps/environment-type"
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/structure"
     },
     {
       "id": "q07",
       "category": "resource-model",
-      "scenario": false,
-      "stem": "In a workload profiles environment, which profile type can scale to zero?",
+      "scenario": true,
+      "stem": "A bursty service must incur no replica compute charge while idle. In a workload profiles environment, which profile type can scale to zero?",
       "options": [
         "Dedicated",
         "Consumption",
@@ -129,8 +131,8 @@
     {
       "id": "q08",
       "category": "resource-model",
-      "scenario": false,
-      "stem": "What is true about a revision in Azure Container Apps?",
+      "scenario": true,
+      "stem": "A release engineer asks to edit an existing revision in place after deployment. Which statement explains why that plan is invalid?",
       "options": [
         "It is mutable and can be edited in place",
         "It is an immutable snapshot of a specific app configuration and container image",
@@ -770,6 +772,156 @@
       "correctIndex": 1,
       "explanation": "A cost saving that regresses the SLO must be rejected and documented; validated savings only count when reliability and performance hold.",
       "source": "https://learn.microsoft.com/en-us/azure/well-architected/cost-optimization/"
+    },
+    {
+      "id": "q51",
+      "category": "functions-on-container-apps",
+      "scenario": true,
+      "stem": "A team wants Functions triggers and bindings, but also needs to colocate event handlers with private APIs in an existing Container Apps environment and use its workload profiles. Which hosting choice best fits?",
+      "options": [
+        "A generic container app with a hand-built polling loop",
+        "Azure Functions on the existing Container Apps environment using kind=functionapp",
+        "A scheduled Container Apps job for every message",
+        "A Windows Function App on the Consumption plan"
+      ],
+      "correctIndex": 1,
+      "explanation": "Native Functions on Container Apps preserves the Functions programming model while applying the environment's networking, observability, and workload-profile capabilities.",
+      "source": "https://learn.microsoft.com/azure/container-apps/functions-overview"
+    },
+    {
+      "id": "q52",
+      "category": "functions-on-container-apps",
+      "scenario": false,
+      "stem": "Which property distinguishes a native Functions workload from a generic Azure Container App when deployed by CLI or ARM?",
+      "options": [
+        "minReplicas=0",
+        "kind=functionapp",
+        "ingress=external",
+        "workloadProfile=Consumption"
+      ],
+      "correctIndex": 1,
+      "explanation": "Native Functions support is selected with the functionapp kind; scale, ingress, and workload profile values are not unique to Functions.",
+      "source": "https://learn.microsoft.com/azure/container-apps/functions-usage"
+    },
+    {
+      "id": "q53",
+      "category": "functions-on-container-apps",
+      "scenario": true,
+      "stem": "A Service Bus-triggered Function on Container Apps never scales from zero even though messages accumulate. Ingress was disabled because the app has no public HTTP endpoint. What is the first platform-specific correction?",
+      "options": [
+        "Add a manual CPU KEDA rule",
+        "Enable ingress, either internal or external, because event-driven autoscaling requires it",
+        "Move the queue into the Container Apps environment",
+        "Set max replicas to zero"
+      ],
+      "correctIndex": 1,
+      "explanation": "Functions on Container Apps requires ingress to be enabled for event-driven autoscaling; it can be internal when public exposure is not required.",
+      "source": "https://learn.microsoft.com/azure/container-apps/functions-overview#considerations"
+    },
+    {
+      "id": "q54",
+      "category": "functions-on-container-apps",
+      "scenario": true,
+      "stem": "A deployment omits the storage account because all business state lives in Cosmos DB. Why is the design invalid?",
+      "options": [
+        "Container Apps requires Azure Files for every image",
+        "Every Function App on Container Apps still requires host storage for triggers, logs, and state",
+        "Cosmos DB cannot be accessed from Container Apps",
+        "Storage is needed only for HTTP triggers"
+      ],
+      "correctIndex": 1,
+      "explanation": "Functions host storage is mandatory even when business data is elsewhere because the Functions runtime uses it for host-level trigger, logging, and state responsibilities.",
+      "source": "https://learn.microsoft.com/azure/container-apps/functions-overview#considerations"
+    },
+    {
+      "id": "q55",
+      "category": "functions-on-container-apps",
+      "scenario": true,
+      "stem": "A team creates two active revisions of a queue-triggered Function using the same host storage and Service Bus queue, expecting a deterministic 90/10 canary. What is wrong with that expectation?",
+      "options": [
+        "Functions cannot create revisions",
+        "Pull-trigger revisions are competing consumers; use isolated event sources and storage or single-revision mode",
+        "Traffic weights automatically partition Service Bus messages",
+        "The queue must use sessions to enable HTTP traffic splitting"
+      ],
+      "correctIndex": 1,
+      "explanation": "HTTP traffic weights do not deterministically partition pull-based events. Concurrent revisions should isolate host storage and event sources unless competing consumption is explicitly intended.",
+      "source": "https://learn.microsoft.com/azure/container-apps/functions-overview#considerations"
+    },
+    {
+      "id": "q56",
+      "category": "functions-on-container-apps",
+      "scenario": true,
+      "stem": "A developer attempts to add a manual Service Bus KEDA rule in the portal, but the control is disabled. What explains the behavior?",
+      "options": [
+        "Service Bus cannot scale Functions",
+        "Functions derives the KEDA rule from trigger configuration by default; custom rules require opting out with allowScalingRuleOverride",
+        "Only CPU scaling is supported",
+        "The app must run on a Dedicated profile"
+      ],
+      "correctIndex": 1,
+      "explanation": "The platform maps Functions trigger settings to KEDA scalers. Teams normally set replica bounds; they assume manual rule ownership only when explicitly overriding generated rules.",
+      "source": "https://learn.microsoft.com/azure/container-apps/functions-overview#event-driven-scaling"
+    },
+    {
+      "id": "q57",
+      "category": "functions-on-container-apps",
+      "scenario": true,
+      "stem": "A Function must receive from Service Bus without a connection-string secret. Which configuration and role are appropriate?",
+      "options": [
+        "Set ServiceBusConnection__fullyQualifiedNamespace and grant Azure Service Bus Data Receiver to the managed identity",
+        "Store RootManageSharedAccessKey in source and grant Reader",
+        "Set AzureWebJobsStorage to the Service Bus endpoint and grant Contributor",
+        "Use AcrPull on the Service Bus namespace"
+      ],
+      "correctIndex": 0,
+      "explanation": "An identity-based Service Bus binding uses the connection-name prefix plus __fullyQualifiedNamespace and requires the data-plane receiver role for trigger consumption.",
+      "source": "https://learn.microsoft.com/azure/azure-functions/functions-bindings-service-bus-trigger#connections"
+    },
+    {
+      "id": "q58",
+      "category": "functions-on-container-apps",
+      "scenario": true,
+      "stem": "A blob-triggered Function processes new blobs but does not scale automatically from blob arrivals on Container Apps. Which trigger design supports autoscaling?",
+      "options": [
+        "A polling blob trigger with no event source",
+        "A Blob Storage trigger using Event Grid as its source",
+        "A timer that lists blobs every second",
+        "A manual CPU rule only"
+      ],
+      "correctIndex": 1,
+      "explanation": "Blob-trigger autoscaling on Functions hosted by Container Apps requires Event Grid as the source.",
+      "source": "https://learn.microsoft.com/azure/container-apps/functions-overview#event-driven-scaling"
+    },
+    {
+      "id": "q59",
+      "category": "functions-on-container-apps",
+      "scenario": true,
+      "stem": "After idle scale-to-zero, the first HTTP request breaches the latency SLO but warm requests pass. Which response is most defensible?",
+      "options": [
+        "Ignore the first request because scale-to-zero is always free",
+        "Measure cold-start distribution, then use minimum replicas or another hosting profile if the SLO cannot tolerate it",
+        "Disable Application Insights",
+        "Increase Service Bus lock duration"
+      ],
+      "correctIndex": 1,
+      "explanation": "Scale-to-zero creates a cold-start tradeoff. Use measured latency and workload economics to decide whether warm minimum replicas or another profile is required.",
+      "source": "https://learn.microsoft.com/azure/container-apps/cold-start"
+    },
+    {
+      "id": "q60",
+      "category": "functions-on-container-apps",
+      "scenario": true,
+      "stem": "A poison Service Bus message repeatedly fails schema validation and consumes retries. What application behavior is required in addition to platform scaling?",
+      "options": [
+        "Treat every failure as transient forever",
+        "Classify non-retryable input, preserve diagnostics, and use the queue's dead-letter policy while keeping side effects idempotent",
+        "Raise max replicas until the message succeeds",
+        "Enable multi-revision mode"
+      ],
+      "correctIndex": 1,
+      "explanation": "Scaling cannot repair invalid input. The function must distinguish permanent from transient failures, support dead-letter operations, and tolerate at-least-once delivery.",
+      "source": "https://learn.microsoft.com/azure/azure-functions/functions-bindings-error-pages"
     }
   ]
 }

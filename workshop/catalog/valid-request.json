@@ -1,0 +1,13 @@
+{
+  "owner": "platform-training@example.invalid",
+  "costCenter": "training",
+  "region": "approved-region",
+  "image": "registry.example.invalid/order-api@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "exposure": "private",
+  "dataClass": "restricted",
+  "minReplicas": 1,
+  "maxReplicas": 10,
+  "rtoMinutes": 30,
+  "rpoMinutes": 5,
+  "embeddedCredential": false
+}

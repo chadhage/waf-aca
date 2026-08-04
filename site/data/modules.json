@@ -3,7 +3,7 @@
     "title": "Well-Architected Azure Container Apps",
     "subtitle": "Level 400 · Empirical 80% competency workshop",
     "passThreshold": 80,
-    "sourceReviewDate": "2026-08-03",
+    "sourceReviewDate": "2026-08-04",
     "totalPoints": 100
   },
   "modules": [
@@ -12,8 +12,8 @@
       "index": 0,
       "code": "L400-00",
       "title": "Baseline and decision model",
-      "duration": "30 min",
-      "domainPoints": 10,
+      "duration": "2 h",
+      "domainPoints": 8,
       "tags": ["Decision", "ADR", "Service selection"],
       "summary": "Agree the shape of the workload before anyone runs az containerapp create. Falsify ACA against AKS, App Service, Functions, Container Instances, and ACA Jobs, then commit an ADR with an exit trigger.",
       "outcomes": [
@@ -26,7 +26,7 @@
         {
           "id": "m0-a1",
           "title": "Capture ten non-negotiable requirements",
-          "time": "~10 min",
+          "time": "~40 min",
           "precheck": "You have a target workload description (use the Contoso greenfield case study if none is assigned).",
           "steps": [
             "List ten hard requirements: OS, process lifetime, protocols, state, isolation, privileged access, scaling signal, latency SLO, recovery objective, and team operating capability.",
@@ -41,7 +41,7 @@
         {
           "id": "m0-a2",
           "title": "Build the elimination matrix",
-          "time": "~10 min",
+          "time": "~40 min",
           "precheck": "Requirements table complete.",
           "steps": [
             "Create a matrix with columns for ACA, AKS, App Service, Functions, Container Instances, and ACA Jobs.",
@@ -56,7 +56,7 @@
         {
           "id": "m0-a3",
           "title": "Prototype the highest-risk assumption and write the ADR",
-          "time": "~10 min",
+          "time": "~40 min",
           "precheck": "Two surviving options identified.",
           "steps": [
             "Prototype the riskiest ACA assumption: cold/warm p95 for a latency-sensitive API, private name resolution and reachability for a private workload, or duplicate-safe recovery for an event worker.",
@@ -75,8 +75,8 @@
       "index": 1,
       "code": "L400-01",
       "title": "Platform foundation",
-      "duration": "30 min",
-      "domainPoints": 15,
+      "duration": "3 h",
+      "domainPoints": 13,
       "tags": ["Environment", "Ingress", "Identity", "Probes"],
       "summary": "Stand up a workload profiles (v2) environment, deploy a participant-owned image pinned by digest, and prove ingress, revisions, probes, and identity behave as designed.",
       "outcomes": [
@@ -89,7 +89,7 @@
         {
           "id": "m1-a1",
           "title": "Create environment and Log Analytics workspace",
-          "time": "~8 min",
+          "time": "~45 min",
           "precheck": "Microsoft.App provider registered and containerapp extension current.",
           "steps": [
             "Create a resource group and a Log Analytics workspace in the approved region.",
@@ -105,7 +105,7 @@
         {
           "id": "m1-a2",
           "title": "Deploy a digest-pinned app with external ingress",
-          "time": "~8 min",
+          "time": "~45 min",
           "precheck": "A participant-owned image exists in ACR (replace the quickstart image).",
           "steps": [
             "Deploy the app with external ingress, a target port, min 1 and max 3 replicas, and modest CPU/memory.",
@@ -121,7 +121,7 @@
         {
           "id": "m1-a3",
           "title": "Prove all three probe behaviours",
-          "time": "~7 min",
+          "time": "~45 min",
           "precheck": "App deployed and reachable.",
           "steps": [
             "Add startup, readiness, and liveness probes via YAML or IaC.",
@@ -136,7 +136,7 @@
         {
           "id": "m1-a4",
           "title": "Foundation failure lab",
-          "time": "~7 min",
+          "time": "~45 min",
           "precheck": "Working deployment and probes in place.",
           "steps": [
             "Predict user-visible and platform behaviour, then inject exactly one fault: wrong target port, nonexistent image tag, or an invalid resource combination.",
@@ -155,8 +155,8 @@
       "index": 2,
       "code": "L400-02",
       "title": "Networking and security",
-      "duration": "30 min",
-      "domainPoints": 15,
+      "duration": "3 h",
+      "domainPoints": 13,
       "tags": ["Private ingress", "Managed identity", "RBAC", "Threat model"],
       "summary": "Threat-model the workload, make required paths private, and prove least-privilege identity with positive and negative tests. No credentials anywhere.",
       "outcomes": [
@@ -169,7 +169,7 @@
         {
           "id": "m2-a1",
           "title": "Threat model the workload",
-          "time": "~8 min",
+          "time": "~45 min",
           "precheck": "Foundation deployment available.",
           "steps": [
             "Draw a data-flow diagram covering ingress, application, identity, registry, pipeline, Key Vault, data, telemetry, and operators.",
@@ -184,7 +184,7 @@
         {
           "id": "m2-a2",
           "title": "Private networking and egress",
-          "time": "~8 min",
+          "time": "~45 min",
           "precheck": "Custom VNet with a subnet delegated to Microsoft.App/environments.",
           "steps": [
             "Create a v2 environment in the custom VNet; choose internal VIP or external VIP with public network access disabled.",
@@ -200,7 +200,7 @@
         {
           "id": "m2-a3",
           "title": "Managed identity, ACR, and Key Vault",
-          "time": "~7 min",
+          "time": "~45 min",
           "precheck": "ACR and a training Key Vault available.",
           "steps": [
             "Create a user-assigned pull identity before app creation and assign AcrPull at the registry scope.",
@@ -216,7 +216,7 @@
         {
           "id": "m2-a4",
           "title": "Five negative access tests",
-          "time": "~7 min",
+          "time": "~45 min",
           "precheck": "Private ingress and identities configured.",
           "steps": [
             "Execute at least five negative tests: public path, plain HTTP, wrong identity, forbidden secret, unapproved image, or privileged operation.",
@@ -235,8 +235,8 @@
       "index": 3,
       "code": "L400-03",
       "title": "Scaling, resilience, performance",
-      "duration": "30 min",
-      "domainPoints": 15,
+      "duration": "3 h",
+      "domainPoints": 13,
       "tags": ["KEDA", "SLO", "Load", "Zone redundancy"],
       "summary": "Define SLOs, drive KEDA scaling from real signals, and prove the workload survives replica death, slow dependencies, and a modelled zone failure.",
       "outcomes": [
@@ -249,7 +249,7 @@
         {
           "id": "m3-a1",
           "title": "Define the SLI, SLO, and error budget",
-          "time": "~7 min",
+          "time": "~45 min",
           "precheck": "A working app or event worker.",
           "steps": [
             "Choose an availability or successful-processing SLI and define valid and good events.",
@@ -264,7 +264,7 @@
         {
           "id": "m3-a2",
           "title": "HTTP scaling under load",
-          "time": "~8 min",
+          "time": "~45 min",
           "precheck": "SLO defined; load tool (k6 or Azure Load Testing) ready.",
           "steps": [
             "Configure an HTTP concurrency scale rule with finite min and max replicas.",
@@ -279,7 +279,7 @@
         {
           "id": "m3-a3",
           "title": "Event-driven scaling with derived concurrency",
-          "time": "~8 min",
+          "time": "~45 min",
           "precheck": "A queue (Service Bus or Storage) and a worker image.",
           "steps": [
             "Compute the initial replica bound from safe downstream concurrency: replicas_max <= floor((D - R) / c).",
@@ -294,7 +294,7 @@
         {
           "id": "m3-a4",
           "title": "Resilience and zone-failure model",
-          "time": "~7 min",
+          "time": "~45 min",
           "precheck": "A zone-redundant environment where the region supports zones.",
           "steps": [
             "Inject replica death and a slow dependency and confirm the app stays within SLO.",
@@ -313,8 +313,8 @@
       "index": 4,
       "code": "L400-04",
       "title": "Delivery and observability",
-      "duration": "30 min",
-      "domainPoints": 15,
+      "duration": "3 h",
+      "domainPoints": 13,
       "tags": ["Revisions", "Canary", "Rollback", "KQL", "Alerts"],
       "summary": "Ship immutable digests through revisions, run a gated canary, roll back by traffic in under five minutes, and prove you can query and alert on correlated telemetry.",
       "outcomes": [
@@ -327,7 +327,7 @@
         {
           "id": "m4-a1",
           "title": "Enable multiple revisions and split traffic",
-          "time": "~8 min",
+          "time": "~45 min",
           "precheck": "App in single-revision mode with a digest-pinned image.",
           "steps": [
             "Switch to multiple revision mode and deploy a new immutable revision.",
@@ -343,7 +343,7 @@
         {
           "id": "m4-a2",
           "title": "Gated canary and fast rollback",
-          "time": "~8 min",
+          "time": "~45 min",
           "precheck": "Canary revision receiving a small traffic share.",
           "steps": [
             "Observe candidate latency and error rate separately from stable.",
@@ -358,7 +358,7 @@
         {
           "id": "m4-a3",
           "title": "Correlated telemetry and KQL",
-          "time": "~7 min",
+          "time": "~45 min",
           "precheck": "App logging to Log Analytics.",
           "steps": [
             "Emit logs that identify app, revision, replica, request, and outcome.",
@@ -374,7 +374,7 @@
         {
           "id": "m4-a4",
           "title": "Alert and runbook",
-          "time": "~7 min",
+          "time": "~45 min",
           "precheck": "A validated KQL query or a metric of interest.",
           "steps": [
             "Create a log or metric alert with an action group.",
@@ -393,7 +393,7 @@
       "index": 5,
       "code": "L400-05",
       "title": "Enterprise architecture and cost",
-      "duration": "30 min",
+      "duration": "2 h",
       "domainPoints": 10,
       "tags": ["Cost model", "Right-sizing", "Platform", "Stamps"],
       "summary": "Model total cost, right-size from percentiles, and defend an enterprise platform design against injected failures.",
@@ -407,7 +407,7 @@
         {
           "id": "m5-a1",
           "title": "Total cost model",
-          "time": "~10 min",
+          "time": "~40 min",
           "precheck": "Observed utilisation from Module 3 available.",
           "steps": [
             "Model compute, requests, logs, network, registry, storage, security, and edge costs.",
@@ -422,7 +422,7 @@
         {
           "id": "m5-a2",
           "title": "Right-size and re-test",
-          "time": "~10 min",
+          "time": "~40 min",
           "precheck": "Baseline load result available.",
           "steps": [
             "Right-size CPU, memory, and scale bounds from p95/p99, throttling, and OOM evidence.",
@@ -437,7 +437,7 @@
         {
           "id": "m5-a3",
           "title": "Defend the enterprise stamp design",
-          "time": "~10 min",
+          "time": "~40 min",
           "precheck": "Familiarity with the enterprise-scale reference from the guide.",
           "steps": [
             "Sketch a two-region, three-team deployment-stamp design with Front Door/WAF, private data, approved ACR, Key Vault, and central observability.",
@@ -452,11 +452,96 @@
       ]
     },
     {
-      "id": "m6",
+      "id": "m8",
       "index": 6,
       "code": "L400-06",
+      "title": "Azure Functions on Container Apps",
+      "duration": "3 h",
+      "domainPoints": 10,
+      "tags": ["Functions v4", "Event-driven", "Service Bus", "KEDA"],
+      "summary": "Run a native Function App inside the same Azure Container Apps environment as APIs and workers. Build a TypeScript v4 custom image, deploy it with kind=functionapp, and prove storage, identity, ingress, trigger-derived KEDA scaling, revision isolation, and telemetry behave as designed.",
+      "outcomes": [
+        "Select native Functions on Container Apps only when the Functions programming model and ACA environment capabilities are both material requirements.",
+        "Build and test a Functions v4 custom image with HTTP and Service Bus triggers using the TypeScript v4 programming model.",
+        "Deploy with kind=functionapp, mandatory host storage, managed identity, bounded replicas, ingress, and Application Insights.",
+        "Explain and test trigger-derived KEDA rules, scale-to-zero cold starts, poison-message handling, and multi-revision consumer isolation."
+      ],
+      "evidenceGate": "A reproducible kind=functionapp deployment in an existing ACA environment where the sample builds and tests locally, HTTP health succeeds, Service Bus messages drain through a managed-identity connection, platform-generated scaling is observed without a hand-authored KEDA rule, a controlled fault is diagnosed, and storage/revision risks are defended.",
+      "activities": [
+        {
+          "id": "m8-a1",
+          "title": "Choose the native Functions hosting boundary",
+          "time": "~45 min",
+          "precheck": "An existing workload profiles Container Apps environment and a workload with at least one event source are available.",
+          "steps": [
+            "Compare four candidates: Functions on Container Apps, Flex Consumption Functions, a generic container app worker, and a Container Apps job. Record which requirement makes each survive or fail.",
+            "Draw the resource model: Microsoft.App/containerApps with kind=functionapp, managed environment, workload profile, host storage account, registry image, identity, ingress, trigger source, and Application Insights.",
+            "State the shared boundaries inherited from the environment and the Functions-specific responsibilities retained by the app, including host configuration, triggers, bindings, idempotency, retries, and poison-message policy.",
+            "Design single-revision and multi-revision release options. For concurrent revisions, allocate distinct host storage and pull-based event sources or explain why competing consumers are acceptable."
+          ],
+          "validation": "The ADR identifies why both Functions and ACA are required, rejects at least one simpler hosting option, and contains an explicit exit trigger.",
+          "evidence": "evidence/07-functions/hosting-decision.md and resource-model.svg.",
+          "talkTrack": "Do not award credit for 'serverless' alone. The candidate must need the Functions trigger/binding model and an ACA capability such as a shared environment, workload profile, private network, Dapr, or specialized hardware.",
+          "stretch": "Model how the decision changes if the workload needs deployment slots, built-in continuous deployment, or resource-group moves."
+        },
+        {
+          "id": "m8-a2",
+          "title": "Build and test the TypeScript v4 function image",
+          "time": "~45 min",
+          "precheck": "Node.js 22, Docker, Azure Functions Core Tools v4, and Azurite are available; workshop/functions contains the sample.",
+          "steps": [
+            "Inspect host.json, package.json, the multi-stage Dockerfile, and the code-first HTTP and Service Bus registrations. Confirm there are no function.json files and the extension bundle is [4.*, 5.0.0).",
+            "Run npm ci, compile TypeScript, and execute the unit tests for validation, idempotency, and retry classification.",
+            "Copy local.settings.example.json to local.settings.json, use Azurite for AzureWebJobsStorage, and provide a non-production Service Bus connection only in the uncommitted local file.",
+            "Start the Functions host, call /api/health, submit valid and malformed order events, and correlate invocation IDs with structured logs."
+          ],
+          "commands": "cd workshop/functions\nnpm ci\nnpm run build\nnpm test\nfunc start\ncurl -fsS http://localhost:7071/api/health",
+          "validation": "The project compiles, all tests pass, health returns 200, malformed input is rejected, and no credential appears in tracked files.",
+          "evidence": "evidence/07-functions/local-build-and-test.txt and sample-log.json.",
+          "talkTrack": "Separate host mechanics from business behavior. A green host start is insufficient; require tests for duplicate delivery and retryability because queue triggers are at-least-once in practice.",
+          "stretch": "Tune host.json concurrency and predict the downstream saturation point before running a load test."
+        },
+        {
+          "id": "m8-a3",
+          "title": "Deploy kind=functionapp into the ACA environment",
+          "time": "~45 min",
+          "precheck": "The sample image builds, and ACR, a storage account, Service Bus queue, and user-assigned identity exist.",
+          "steps": [
+            "Build the image in ACR, resolve its immutable digest, and grant the pull identity AcrPull plus the runtime identity Azure Service Bus Data Receiver at the narrowest useful scopes.",
+            "Create the app in the existing environment with az containerapp create --kind functionapp, Functions host v4, the host storage account, Consumption workload profile, ingress, and bounded minimum/maximum replicas.",
+            "Configure ServiceBusConnection__fullyQualifiedNamespace for identity-based binding resolution and connect Application Insights without storing an instrumentation key in source.",
+            "Inspect effective kind, environment ID, image digest, identity, ingress, storage, revision mode, replica bounds, and generated scale configuration."
+          ],
+          "commands": "az acr build --registry \"$ACR_NAME\" --image \"functions-orders:$IMAGE_TAG\" workshop/functions\nIMAGE_DIGEST=$(az acr repository show --name \"$ACR_NAME\" --image \"functions-orders:$IMAGE_TAG\" --query digest -o tsv)\naz containerapp create --name \"$FUNCTION_APP\" --resource-group \"$RESOURCE_GROUP\" --environment \"$ENVIRONMENT\" --kind functionapp --functions-version 4 --storage-account \"$FUNCTION_STORAGE\" --workload-profile-name Consumption --image \"$ACR_LOGIN_SERVER/functions-orders@$IMAGE_DIGEST\" --ingress external --target-port 80 --min-replicas 0 --max-replicas 20",
+          "validation": "Resource kind is functionapp, the image is digest-pinned, TLS health succeeds, identity-based Service Bus access succeeds, and no registry or runtime credential is embedded in source.",
+          "evidence": "evidence/07-functions/functionapp-show.json, role-assignments.json, and health-response.json.",
+          "talkTrack": "The storage account is not optional host plumbing. Require candidates to explain its trigger, log, and state roles, and why each concurrently active revision may need isolated storage.",
+          "stretch": "Deploy the same image to a Dedicated workload profile and compare cold start, idle cost, and maximum resource assumptions."
+        },
+        {
+          "id": "m8-a4",
+          "title": "Prove trigger scaling, failure handling, and revision safety",
+          "time": "~45 min",
+          "precheck": "The deployed function app can read from a dedicated Service Bus queue and emit telemetry.",
+          "steps": [
+            "Record replica count at idle, enqueue a bounded burst, and capture queue depth, queue age, invocation rate, failures, dependency latency, replica count, and drain time on one UTC timeline.",
+            "Show that the platform derived the Service Bus KEDA rule from the Functions trigger. Change only minimum/maximum replica bounds; do not add a manual rule unless testing allowScalingRuleOverride.",
+            "Inject one fault: remove Service Bus receiver RBAC, disable required ingress, misconfigure host storage, or publish a poison message. Predict the signal, diagnose it, repair it, and verify recovery.",
+            "Create a candidate revision with no production traffic. Explain why two active pull-trigger revisions sharing one queue compete rather than split deterministically, then choose single revision or isolated event sources for release."
+          ],
+          "validation": "The app scales out and drains the queue within the stated objective, returns toward zero when idle, the fault is recovered from telemetry, and the release plan prevents unintended competing consumers.",
+          "evidence": "evidence/07-functions/scale-and-fault-timeline.md, metrics.json, and revision-safety.md.",
+          "talkTrack": "The portal's manual scale-rule control is disabled by default because Functions generates the rules. Ask what allowScalingRuleOverride changes and what responsibility transfers back to the team.",
+          "stretch": "Test a blob trigger and prove why Event Grid is required for blob-trigger autoscaling on this hosting model."
+        }
+      ]
+    },
+    {
+      "id": "m6",
+      "index": 7,
+      "code": "L400-07",
       "title": "Case studies and catalog",
-      "duration": "30 min",
+      "duration": "2 h",
       "domainPoints": 5,
       "tags": ["Greenfield", "Brownfield", "Catalog"],
       "summary": "Apply the model to Contoso greenfield and Fabrikam brownfield decisions, then process one valid and one unsafe catalog request.",
@@ -470,7 +555,7 @@
         {
           "id": "m6-a1",
           "title": "Contoso greenfield design",
-          "time": "~10 min",
+          "time": "~35 min",
           "precheck": "Contoso requirements: 100 rps average, 1,500 peak, 99.95%, RTO 30 min, RPO 5 min.",
           "steps": [
             "Assign apps for API and catalog and worker, and a scheduled job for reconciliation.",
@@ -478,14 +563,14 @@
             "Configure separate managed identities, canary gates, and data replication to RPO."
           ],
           "validation": "Design meets the stated SLOs and recovery objectives.",
-          "evidence": "evidence/08-capstone/contoso-design.md.",
+          "evidence": "evidence/08-case-studies/contoso-design.md.",
           "talkTrack": "Ask how they prove the RPO. Replication configured is not replication tested.",
           "stretch": "Calculate cost per 1,000 successful orders."
         },
         {
           "id": "m6-a2",
           "title": "Fabrikam brownfield migration",
-          "time": "~10 min",
+          "time": "~40 min",
           "precheck": "Fabrikam estate: .NET web app and Windows service on VMs, local session and uploads, SQL polling, config-stored connection string.",
           "steps": [
             "Classify Windows and local-state blockers; port, retain, or select another service.",
@@ -493,14 +578,14 @@
             "Sequence a strangler migration with gates, reconciliation, and a time-bounded rollback."
           ],
           "validation": "An unportable Windows dependency is retained on a suitable platform while eligible services move.",
-          "evidence": "evidence/08-capstone/fabrikam-migration.md.",
+          "evidence": "evidence/08-case-studies/fabrikam-migration.md.",
           "talkTrack": "A correct answer does not force everything into ACA. It moves what fits and keeps what does not on a suitable platform.",
           "stretch": "Produce the retirement checklist for old credentials, routes, and resources."
         },
         {
           "id": "m6-a3",
           "title": "Catalog admission: one valid, one unsafe",
-          "time": "~10 min",
+          "time": "~45 min",
           "precheck": "Catalog request schema from the guide.",
           "steps": [
             "Process one valid and one unsafe request in 45 minutes.",
@@ -508,7 +593,7 @@
             "Produce required resources, approvals, and tests, and explain rollback."
           ],
           "validation": "Automation blocks the unsafe request (latest tag, unbounded scale, embedded credential, or public exposure of restricted data).",
-          "evidence": "evidence/08-capstone/catalog-decision.md.",
+          "evidence": "evidence/08-case-studies/catalog-decision.md.",
           "talkTrack": "Full credit requires proving the automation blocks the unsafe request, not just describing why it is unsafe.",
           "stretch": "Add the noisy-neighbour test that would route the workload to standalone."
         }
@@ -516,10 +601,10 @@
     },
     {
       "id": "m7",
-      "index": 7,
-      "code": "L400-07",
+      "index": 8,
+      "code": "L400-08",
       "title": "Individual capstone and defense",
-      "duration": "30 min",
+      "duration": "3 h",
       "domainPoints": 15,
       "tags": ["Capstone", "Incident", "Oral defense"],
       "summary": "Individually deploy or repair an external API and event worker to the full evidence bar, recover from two injected faults, and defend the design.",
@@ -533,7 +618,7 @@
         {
           "id": "m7-a1",
           "title": "Deploy or repair to the full bar",
-          "time": "~12 min",
+          "time": "~75 min",
           "precheck": "Clean or randomized environment issued by the assessor.",
           "steps": [
             "Deliver TLS-only API ingress, no worker ingress, managed identity, no credentials, and all three probe types.",
@@ -541,14 +626,14 @@
             "Run a canary with rollback and produce SLO, load, and cost evidence."
           ],
           "validation": "All boundaries are correct and reproducible from IaC or documented CLI.",
-          "evidence": "evidence/08-capstone/capstone-artifacts/.",
+          "evidence": "evidence/09-capstone/capstone-artifacts/.",
           "talkTrack": "Assessors verify live Azure state and raw evidence, not the candidate narrative. Reset and randomize between candidates.",
           "stretch": "Deliver the entire bar from reviewed IaC with a what-if step."
         },
         {
           "id": "m7-a2",
           "title": "Recover from two injected faults",
-          "time": "~10 min",
+          "time": "~60 min",
           "precheck": "Assessor injects two faults from the pool.",
           "steps": [
             "Diagnose from evidence: target port, readiness path, denied role, private DNS, poison message, OOM, runaway scale, bad revision traffic, or downstream throttling.",
@@ -556,14 +641,14 @@
             "Record detection, mitigation, and recovery timestamps."
           ],
           "validation": "Both faults are recovered with evidence-based cause and verified recovery.",
-          "evidence": "evidence/08-capstone/incident-timeline.md.",
+          "evidence": "evidence/09-capstone/incident-timeline.md.",
           "talkTrack": "Ask what would falsify the diagnosis. A candidate who cannot answer is pattern-matching, not reasoning.",
           "stretch": "Show the telemetry that would have detected the fault before users did."
         },
         {
           "id": "m7-a3",
           "title": "Oral defense",
-          "time": "~8 min",
+          "time": "~45 min",
           "precheck": "Capstone artifacts submitted.",
           "steps": [
             "Answer counterfactual prompts: why zero minimum is valid, what happens when every replica retries throttling, how to prove private access.",
@@ -571,7 +656,7 @@
             "State which requirement would force AKS or another service."
           ],
           "validation": "The candidate handles at least two counterfactual changes without contradiction.",
-          "evidence": "evidence/08-capstone/defense-notes.md.",
+          "evidence": "evidence/09-capstone/defense-notes.md.",
           "talkTrack": "Score reasoning and tradeoff quality, not service preference. Retain transcript, results, and defense notes.",
           "stretch": "Have the candidate propose the next experiment they would run in production."
         }

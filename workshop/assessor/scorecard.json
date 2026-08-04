@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "overallPass": 80,
+  "minimumCategoryPercent": 60,
+  "criticalFailures": [
+    "required-private service exposed",
+    "credential committed or submitted",
+    "TLS disabled",
+    "unjustified broad role",
+    "function host storage omitted or exposed",
+    "pull-trigger revisions compete without an explicit isolation decision",
+    "service not restored"
+  ],
+  "requiredCompetencies": [
+    "select native Functions on Container Apps only when both the Functions programming model and Container Apps environment capabilities are required",
+    "deploy a digest-pinned kind=functionapp resource with host storage, identity-based trigger access, ingress, and bounded replicas",
+    "prove trigger-derived scaling and diagnose one Functions-specific fault from telemetry",
+    "defend idempotency, poison-message, cold-start, and pull-trigger revision-isolation decisions"
+  ],
+  "categories": {
+    "decision": 10,
+    "deployment": 10,
+    "identitySupplyChain": 8,
+    "networkSecurity": 7,
+    "reliability": 10,
+    "scalingPerformance": 10,
+    "observability": 10,
+    "release": 10,
+    "incident": 15,
+    "cost": 5,
+    "defense": 5
+  }
+}

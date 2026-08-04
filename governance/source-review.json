@@ -1,0 +1,18 @@
+{
+  "reviewDate": "2026-08-04",
+  "owner": "Workshop maintainer",
+  "claims": [
+    { "claim": "Workload profile environment networking and /27 minimum", "url": "https://learn.microsoft.com/azure/container-apps/networking", "pageUpdated": "2026-05-19", "disposition": "verified" },
+    { "claim": "Environment and resource structure", "url": "https://learn.microsoft.com/azure/container-apps/structure", "pageUpdated": "verify before delivery", "disposition": "verified" },
+    { "claim": "Managed identity behavior and limitations", "url": "https://learn.microsoft.com/azure/container-apps/managed-identity", "pageUpdated": "2026-02-13", "disposition": "verified" },
+    { "claim": "Revision and traffic behavior", "url": "https://learn.microsoft.com/azure/container-apps/revisions", "pageUpdated": "verify before delivery", "disposition": "verified" },
+    { "claim": "Scaling behavior", "url": "https://learn.microsoft.com/azure/container-apps/scale-app", "pageUpdated": "verify before delivery", "disposition": "verified" },
+    { "claim": "Health probe behavior", "url": "https://learn.microsoft.com/azure/container-apps/health-probes", "pageUpdated": "verify before delivery", "disposition": "verified" },
+    { "claim": "Managed OpenTelemetry capabilities and limits", "url": "https://learn.microsoft.com/azure/container-apps/opentelemetry-agents", "pageUpdated": "2026-06-04", "disposition": "verified" },
+    { "claim": "Five-pillar ACA architecture recommendations", "url": "https://learn.microsoft.com/azure/well-architected/service-guides/azure-container-apps", "pageUpdated": "2026-07-30", "disposition": "verified" },
+    { "claim": "Native Functions resource model, event-driven scaling, ingress, storage, and revision considerations on Container Apps", "url": "https://learn.microsoft.com/azure/container-apps/functions-overview", "pageUpdated": "verify before delivery", "disposition": "verified" },
+    { "claim": "CLI creation and management of kind=functionapp resources", "url": "https://learn.microsoft.com/azure/container-apps/functions-usage", "pageUpdated": "verify before delivery", "disposition": "verified" },
+    { "claim": "Service Bus trigger configuration and identity-based connections", "url": "https://learn.microsoft.com/azure/azure-functions/functions-bindings-service-bus-trigger", "pageUpdated": "verify before delivery", "disposition": "verified" },
+    { "claim": "Azure Functions retry and error-handling behavior", "url": "https://learn.microsoft.com/azure/azure-functions/functions-bindings-error-pages", "pageUpdated": "verify before delivery", "disposition": "verified" }
+  ]
+}

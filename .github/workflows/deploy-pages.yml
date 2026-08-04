@@ -24,6 +24,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate workshop content
+        run: |
+          node scripts/validate-content.mjs
+          node scripts/validate-catalog-request.mjs workshop/catalog/valid-request.json
+          if node scripts/validate-catalog-request.mjs workshop/catalog/unsafe-request.json; then exit 1; fi
+
+      - name: Build and test Functions sample
+        working-directory: workshop/functions
+        run: |
+          npm ci
+          npm test
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 

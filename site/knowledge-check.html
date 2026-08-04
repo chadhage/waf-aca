@@ -4,18 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Knowledge check · Well-Architected Azure Container Apps</title>
-  <meta name="description" content="A randomized 25-question knowledge check drawn from a bank of 50+ questions across six weighted categories. Score 80% or higher to certify." />
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="description" content="A randomized 25-question knowledge check drawn from 60 questions across seven weighted categories. Score 80% overall and 60% in every category." />
+  <link rel="stylesheet" href="styles.css?v=20260804-4" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234aa8ff'/><text x='50' y='68' font-size='58' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>C</text></svg>" />
 </head>
 <body>
   <header class="topbar">
     <div class="wrap">
       <a class="brand" href="index.html">
-        <span class="logo">C</span>
+        <img class="logo" src="assets/azure-icons/container-apps-env.svg" alt="" />
         <span>Well-Architected ACA<small>Azure Container Apps · L400</small></span>
       </a>
-      <nav class="navlinks">
+      <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="site-menu" aria-label="Open navigation">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </button>
+      <nav class="navlinks" id="site-menu" aria-label="Primary navigation">
         <a href="index.html">Overview</a>
         <a href="lab.html">Lab guide</a>
         <a href="knowledge-check.html">Knowledge check</a>
@@ -27,21 +30,21 @@
   <!-- Intro screen -->
   <section class="wrap section-pad" id="kc-intro">
     <p class="kicker">Randomized competency check</p>
-    <h1 class="page-title">Prove it on the 80% gate</h1>
+    <h1 class="page-title">Complete the knowledge gate</h1>
     <div class="kc-intro">
       <p class="text-dim">
-        Twenty-five questions are drawn at random from a bank of fifty, weighted across six categories:
+        Twenty-five questions are drawn at random from a bank of sixty, weighted across seven categories:
         service selection, resource model, networking and security, scaling and reliability, delivery and
-        operations, and cost and compliance. Most questions are scenario-based. You need <strong>80% or higher</strong> to pass,
+        operations, cost and compliance, and Functions on Container Apps. At least 60% are scenario-based. You need <strong>80% overall and 60% in every category</strong> to pass,
         and every answer links to its official Microsoft source.
       </p>
       <div class="grid-3 mt-24">
         <div class="card"><div class="num stat-num-sm">25</div><div class="lbl stat-lbl-sm">Questions issued</div></div>
-        <div class="card"><div class="num stat-num-sm">≥80%</div><div class="lbl stat-lbl-sm">To certify</div></div>
-        <div class="card"><div class="num stat-num-sm">6</div><div class="lbl stat-lbl-sm">Weighted categories</div></div>
+        <div class="card"><div class="num stat-num-sm">≥80%</div><div class="lbl stat-lbl-sm">Overall · 60% each domain</div></div>
+        <div class="card"><div class="num stat-num-sm">7</div><div class="lbl stat-lbl-sm">Weighted categories</div></div>
       </div>
       <div class="row-actions">
-        <button class="btn btn-primary" id="start-kc">Start the check →</button>
+        <button class="btn btn-primary" id="start-kc" disabled>Loading question bank…</button>
         <a class="btn btn-ghost" href="lab.html">Back to the lab guide</a>
       </div>
     </div>
@@ -74,12 +77,12 @@
 
   <footer class="footer">
     <div class="wrap">
-      <div class="fnote">All answer sources point to official Microsoft documentation · Review date 2026-08-03.</div>
+      <div class="fnote">All answer sources point to official Microsoft documentation · Review date 2026-08-04.</div>
       <button class="icon-btn" data-theme-toggle>◐ <span data-theme-label>Light</span></button>
     </div>
   </footer>
 
-  <script src="app.js"></script>
-  <script src="knowledge-check.js"></script>
+  <script src="app.js?v=20260804-3"></script>
+  <script src="knowledge-check.js?v=20260804-3"></script>
 </body>
 </html>
