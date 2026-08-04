@@ -386,6 +386,13 @@ section { padding: 46px 0; }
 .footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
 .footer .fnote { color: var(--text-faint); font-size: 13px; }
 .footer a { color: var(--text-dim); font-size: 13px; }
+.footer .disclaimer {
+  flex-basis: 100%; width: 100%; margin: 0;
+  color: var(--text-faint); font-size: 12.5px; line-height: 1.6;
+  padding: 14px 16px; border: 1px solid var(--border-soft);
+  border-radius: var(--radius); background: var(--bg-alt);
+}
+.footer .disclaimer strong { color: var(--text-dim); }
 
 /* ============================================================
    LAB PAGE
