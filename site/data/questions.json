@@ -1,0 +1,775 @@
+{
+  "meta": {
+    "passThreshold": 80,
+    "questionsToIssue": 25,
+    "categoryWeights": {
+      "selection-architecture": 0.16,
+      "resource-model": 0.16,
+      "networking-security": 0.20,
+      "scaling-performance-reliability": 0.20,
+      "delivery-operations": 0.16,
+      "cost-geography-compliance": 0.12
+    },
+    "sourceReviewDate": "2026-08-03"
+  },
+  "categories": {
+    "selection-architecture": "Service selection and architecture",
+    "resource-model": "Resource and hosting model",
+    "networking-security": "Networking and security",
+    "scaling-performance-reliability": "Scaling, performance, reliability",
+    "delivery-operations": "Delivery and operations",
+    "cost-geography-compliance": "Cost, geography, compliance"
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "category": "selection-architecture",
+      "scenario": true,
+      "stem": "A team needs a custom Kubernetes operator (CRD) and direct control of the node pool for a specialized scheduler. Which requirement most clearly rules out Azure Container Apps?",
+      "options": [
+        "The need for HTTPS ingress",
+        "The requirement for a custom CRD-based operator and node-level control",
+        "The desire to run Linux containers",
+        "The use of environment variables for configuration"
+      ],
+      "correctIndex": 1,
+      "explanation": "Azure Container Apps abstracts the Kubernetes control plane, so custom operators/CRDs and node-level control are not exposed. That is a genuine constraint favoring AKS.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/compare-options"
+    },
+    {
+      "id": "q02",
+      "category": "selection-architecture",
+      "scenario": false,
+      "stem": "Which Azure service is purpose-built for serverless containers with built-in scale-to-zero, HTTP ingress, and event-driven scaling without managing Kubernetes?",
+      "options": [
+        "Azure Kubernetes Service",
+        "Azure Container Instances",
+        "Azure Container Apps",
+        "Azure Virtual Machine Scale Sets"
+      ],
+      "correctIndex": 2,
+      "explanation": "Azure Container Apps provides serverless containers with KEDA-based event scaling, scale-to-zero, and managed ingress on top of a hidden Kubernetes and Dapr/KEDA/Envoy foundation.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/overview"
+    },
+    {
+      "id": "q03",
+      "category": "selection-architecture",
+      "scenario": true,
+      "stem": "A workload requires Windows containers. What is the correct Container Apps conclusion?",
+      "options": [
+        "Enable a Windows workload profile in the environment",
+        "Windows containers are not supported; select another service such as AKS or App Service",
+        "Convert the environment to Consumption-only mode",
+        "Use a Dedicated profile to unlock Windows support"
+      ],
+      "correctIndex": 1,
+      "explanation": "Azure Container Apps runs Linux containers only. A hard Windows-container requirement is an exit trigger toward AKS or App Service.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/containers"
+    },
+    {
+      "id": "q04",
+      "category": "selection-architecture",
+      "scenario": false,
+      "stem": "Which unit in Azure Container Apps is the deployable application boundary that owns ingress and revisions?",
+      "options": [
+        "The environment",
+        "The container app",
+        "The replica",
+        "The workload profile"
+      ],
+      "correctIndex": 1,
+      "explanation": "A container app is the application boundary that owns its ingress configuration and produces revisions; the environment is the shared secure boundary that hosts multiple apps.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/environment"
+    },
+    {
+      "id": "q05",
+      "category": "selection-architecture",
+      "scenario": true,
+      "stem": "A batch of records must be processed on a schedule and then the compute should stop entirely. Which Container Apps construct fits best?",
+      "options": [
+        "A container app with min replicas set to 1",
+        "A container apps job",
+        "A Dedicated workload profile",
+        "An external ingress app with a timer sidecar"
+      ],
+      "correctIndex": 1,
+      "explanation": "Container Apps jobs run to completion on a schedule or event and then stop, which suits scheduled or finite work better than an always-considered app.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/jobs"
+    },
+    {
+      "id": "q06",
+      "category": "resource-model",
+      "scenario": false,
+      "stem": "Which environment type is the current default and provides the richer networking stack and multiple workload profiles?",
+      "options": [
+        "Consumption-only environment",
+        "Workload profiles environment",
+        "Dedicated-only environment",
+        "Managed cluster environment"
+      ],
+      "correctIndex": 1,
+      "explanation": "The workload profiles environment is the default and supports Consumption, Dedicated, and Flex (preview) profiles plus richer networking. Consumption-only is the legacy structure.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/environment-type"
+    },
+    {
+      "id": "q07",
+      "category": "resource-model",
+      "scenario": false,
+      "stem": "In a workload profiles environment, which profile type can scale to zero?",
+      "options": [
+        "Dedicated",
+        "Consumption",
+        "Flex",
+        "All profile types scale to zero identically"
+      ],
+      "correctIndex": 1,
+      "explanation": "The Consumption profile can scale to zero. Dedicated bills per running instance, and the Flex profile (preview) cannot scale to zero.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/workload-profiles-overview"
+    },
+    {
+      "id": "q08",
+      "category": "resource-model",
+      "scenario": false,
+      "stem": "What is true about a revision in Azure Container Apps?",
+      "options": [
+        "It is mutable and can be edited in place",
+        "It is an immutable snapshot of a specific app configuration and container image",
+        "It only exists in single-revision mode",
+        "It stores durable application data for replicas"
+      ],
+      "correctIndex": 1,
+      "explanation": "A revision is an immutable snapshot. Changing revision-scope properties creates a new revision rather than mutating the existing one.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/revisions"
+    },
+    {
+      "id": "q09",
+      "category": "resource-model",
+      "scenario": true,
+      "stem": "An app writes uploaded files to the container filesystem and expects them to persist across replica restarts. What is the flaw?",
+      "options": [
+        "The container filesystem is durable, so there is no flaw",
+        "Replica local storage is ephemeral; durable data needs external storage such as Azure Files or Blob",
+        "Files persist only if min replicas is greater than one",
+        "Files persist only in Dedicated profiles"
+      ],
+      "correctIndex": 1,
+      "explanation": "Replica-local storage is ephemeral. Durable data must go to external storage, and shared state needs an Azure Files volume mount or an external service.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/storage-mounts"
+    },
+    {
+      "id": "q10",
+      "category": "resource-model",
+      "scenario": false,
+      "stem": "Which probe removes a replica from receiving traffic when it fails, without restarting the replica?",
+      "options": [
+        "Startup probe",
+        "Liveness probe",
+        "Readiness probe",
+        "Scale probe"
+      ],
+      "correctIndex": 2,
+      "explanation": "A failing readiness probe gates traffic away from the replica. A failing liveness probe restarts the replica; a startup probe tolerates slow initialization.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/health-probes"
+    },
+    {
+      "id": "q11",
+      "category": "networking-security",
+      "scenario": false,
+      "stem": "To pull an image from Azure Container Registry using managed identity, which role must the identity hold on the registry?",
+      "options": [
+        "Contributor",
+        "AcrPull",
+        "Reader",
+        "Key Vault Secrets User"
+      ],
+      "correctIndex": 1,
+      "explanation": "AcrPull grants image pull rights. Assign it to the app's managed identity at the registry scope to avoid registry credentials.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull"
+    },
+    {
+      "id": "q12",
+      "category": "networking-security",
+      "scenario": true,
+      "stem": "You need an app to read a secret from Key Vault using managed identity with least privilege. Which role should you grant?",
+      "options": [
+        "Key Vault Administrator",
+        "Key Vault Secrets Officer",
+        "Key Vault Secrets User",
+        "Owner"
+      ],
+      "correctIndex": 2,
+      "explanation": "Key Vault Secrets User grants read access to secret values under RBAC, which satisfies least privilege for retrieval without write or management rights.",
+      "source": "https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide"
+    },
+    {
+      "id": "q13",
+      "category": "networking-security",
+      "scenario": true,
+      "stem": "A create-time Key Vault secret reference fails because the identity does not yet exist. What is the most likely cause?",
+      "options": [
+        "Key Vault does not support Container Apps",
+        "A system-assigned identity does not exist until its app is created, so it cannot be granted access beforehand",
+        "The vault must be in a different region",
+        "AcrPull was assigned instead of a secrets role"
+      ],
+      "correctIndex": 1,
+      "explanation": "A system-assigned identity is created with the app, so it cannot be granted vault access before the app exists. A user-assigned identity created first avoids the chicken-and-egg problem.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity"
+    },
+    {
+      "id": "q14",
+      "category": "networking-security",
+      "scenario": false,
+      "stem": "Which statement about private endpoints on a Container Apps environment is correct?",
+      "options": [
+        "They require public network access to remain enabled",
+        "They require public network access to be disabled and incur additional charges",
+        "They are free and enabled by default",
+        "They are only available in Consumption-only environments"
+      ],
+      "correctIndex": 1,
+      "explanation": "Using a private endpoint requires public network access to be disabled on the environment and incurs private endpoint charges.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/how-to-use-private-endpoint"
+    },
+    {
+      "id": "q15",
+      "category": "networking-security",
+      "scenario": true,
+      "stem": "An internal-only environment resolves a private DNS name but connections still fail. What does this most directly indicate?",
+      "options": [
+        "DNS resolution and network reachability are separate; a route, NSG, or firewall is likely blocking the path",
+        "The app must be redeployed to a Dedicated profile",
+        "Private DNS is not supported for internal environments",
+        "The TLS certificate is missing"
+      ],
+      "correctIndex": 0,
+      "explanation": "A DNS answer proves name resolution, not reachability. Failing connections after a good DNS answer point to routing, NSG, or firewall controls on the path.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/networking"
+    },
+    {
+      "id": "q16",
+      "category": "networking-security",
+      "scenario": false,
+      "stem": "For a workload profiles (v2) environment injected into a custom VNet, what is the documented minimum subnet size?",
+      "options": [
+        "/23",
+        "/27",
+        "/29",
+        "/30"
+      ],
+      "correctIndex": 1,
+      "explanation": "A workload profiles environment requires a dedicated subnet of at least /27. The legacy Consumption-only environment requires /23.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/networking"
+    },
+    {
+      "id": "q17",
+      "category": "networking-security",
+      "scenario": true,
+      "stem": "You must give a workload a single stable outbound public IP for a partner allowlist. Which control fits best?",
+      "options": [
+        "Assign a public IP to each replica",
+        "Associate a NAT Gateway with the environment subnet",
+        "Enable external ingress",
+        "Switch to a Dedicated profile"
+      ],
+      "correctIndex": 1,
+      "explanation": "A NAT Gateway on the subnet gives a predictable, stable outbound IP for egress, which suits partner allowlists. Azure Firewall adds inspection when required.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/networking"
+    },
+    {
+      "id": "q18",
+      "category": "scaling-performance-reliability",
+      "scenario": false,
+      "stem": "Which technology powers event-driven autoscaling in Azure Container Apps?",
+      "options": [
+        "The Horizontal Pod Autoscaler only",
+        "KEDA scalers",
+        "Azure Autoscale settings on VMSS",
+        "Dapr bindings"
+      ],
+      "correctIndex": 1,
+      "explanation": "Container Apps uses KEDA to scale on HTTP, TCP, CPU, memory, and many event sources such as queues.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app"
+    },
+    {
+      "id": "q19",
+      "category": "scaling-performance-reliability",
+      "scenario": true,
+      "stem": "An HTTP app is set to min replicas 0. Users report occasional slow first requests. What is the most accurate explanation?",
+      "options": [
+        "Scale-to-zero is broken and must be disabled",
+        "Cold start latency occurs when scaling from zero; set a minimum replica count if the latency SLO cannot absorb it",
+        "The Dedicated profile is required for all HTTP apps",
+        "Readiness probes cause the latency"
+      ],
+      "correctIndex": 1,
+      "explanation": "Scaling from zero adds cold-start latency. If the SLO cannot absorb it, keep a minimum replica warm; otherwise scale-to-zero is a valid cost tradeoff.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app"
+    },
+    {
+      "id": "q20",
+      "category": "scaling-performance-reliability",
+      "scenario": true,
+      "stem": "A queue worker scales up aggressively and the downstream database begins throttling. What is the sound corrective principle?",
+      "options": [
+        "Increase max replicas further to overcome throttling",
+        "Bound max replicas to the safe downstream concurrency the dependency can absorb",
+        "Disable the readiness probe",
+        "Move to external ingress"
+      ],
+      "correctIndex": 1,
+      "explanation": "More replicas amplify pressure on a throttled dependency. Scale to the bottleneck by bounding max replicas to safe downstream concurrency.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app"
+    },
+    {
+      "id": "q21",
+      "category": "scaling-performance-reliability",
+      "scenario": false,
+      "stem": "When must zone redundancy be configured for a Container Apps environment?",
+      "options": [
+        "Any time after creation via an update",
+        "At environment creation time; it cannot be changed afterward",
+        "Only when enabling private endpoints",
+        "Per revision at deploy time"
+      ],
+      "correctIndex": 1,
+      "explanation": "Zone redundancy is set at environment creation and is immutable. To change it, create a new environment.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/disaster-recovery"
+    },
+    {
+      "id": "q22",
+      "category": "scaling-performance-reliability",
+      "scenario": true,
+      "stem": "For a 99.9% monthly availability SLO, approximately how much downtime is the error budget?",
+      "options": [
+        "About 4.3 minutes",
+        "About 43 minutes",
+        "About 7.2 hours",
+        "About 8.6 seconds"
+      ],
+      "correctIndex": 1,
+      "explanation": "99.9% over 30 days allows roughly 43.2 minutes of budgeted downtime, which drives burn-rate alerting.",
+      "source": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/metrics"
+    },
+    {
+      "id": "q23",
+      "category": "scaling-performance-reliability",
+      "scenario": true,
+      "stem": "A worker uses at-least-once messaging and a replica is killed mid-message. What must the design guarantee?",
+      "options": [
+        "Exactly-once delivery is automatic",
+        "Idempotent, duplicate-safe processing because the message can be redelivered",
+        "The message is lost and should be ignored",
+        "Ingress must be disabled to prevent duplicates"
+      ],
+      "correctIndex": 1,
+      "explanation": "At-least-once delivery means a message can be redelivered after a failure, so processing must be idempotent and duplicate-safe.",
+      "source": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview"
+    },
+    {
+      "id": "q24",
+      "category": "delivery-operations",
+      "scenario": false,
+      "stem": "In multiple revision mode, how is production traffic distributed between revisions?",
+      "options": [
+        "Automatically by replica count",
+        "By explicit traffic weights that total 100",
+        "Randomly per request",
+        "By the revision creation timestamp"
+      ],
+      "correctIndex": 1,
+      "explanation": "Traffic splitting uses explicit weights across active revisions that must total 100, enabling canary and blue-green patterns.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/traffic-splitting"
+    },
+    {
+      "id": "q25",
+      "category": "delivery-operations",
+      "scenario": true,
+      "stem": "A canary at 10% shows elevated errors on the candidate revision. What is the fastest safe rollback?",
+      "options": [
+        "Rebuild and redeploy the image",
+        "Shift traffic weight back to the previous known-good revision",
+        "Delete the environment",
+        "Restart every replica"
+      ],
+      "correctIndex": 1,
+      "explanation": "Because revisions are retained, rollback is a traffic-weight change to the known-good revision, completing in seconds to minutes without rebuilding.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/traffic-splitting"
+    },
+    {
+      "id": "q26",
+      "category": "delivery-operations",
+      "scenario": false,
+      "stem": "Where do Container Apps console and system logs land for KQL analysis by default?",
+      "options": [
+        "Only to local replica files",
+        "To a Log Analytics workspace via the environment's logging configuration",
+        "To Azure Storage tables automatically",
+        "To the container registry"
+      ],
+      "correctIndex": 1,
+      "explanation": "The environment sends console and system logs to a Log Analytics workspace where ContainerAppConsoleLogs and system tables can be queried with KQL.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/log-monitoring"
+    },
+    {
+      "id": "q27",
+      "category": "delivery-operations",
+      "scenario": true,
+      "stem": "You want distributed tracing across services in Container Apps. What is the accurate constraint?",
+      "options": [
+        "The Application Insights auto-instrumentation agent is fully supported and enabled by default",
+        "The auto-instrumentation agent is not supported; instrument with the SDK or use the managed OpenTelemetry agent",
+        "Tracing is impossible in Container Apps",
+        "Tracing requires a Dedicated profile"
+      ],
+      "correctIndex": 1,
+      "explanation": "Container Apps does not support the Application Insights auto-instrumentation agent; use SDK-based instrumentation or the managed OpenTelemetry agent.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/opentelemetry-agents"
+    },
+    {
+      "id": "q28",
+      "category": "delivery-operations",
+      "scenario": false,
+      "stem": "What is required for an Azure Monitor alert to notify responders?",
+      "options": [
+        "A revision label",
+        "An action group attached to the alert rule",
+        "External ingress",
+        "A Dedicated workload profile"
+      ],
+      "correctIndex": 1,
+      "explanation": "Alert rules route notifications through an action group. Without one, the condition can fire but no one is notified.",
+      "source": "https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/action-groups"
+    },
+    {
+      "id": "q29",
+      "category": "cost-geography-compliance",
+      "scenario": false,
+      "stem": "How is the Consumption plan primarily billed in Container Apps?",
+      "options": [
+        "A flat monthly fee per app",
+        "Per vCPU-second and GiB-second of active/idle usage plus HTTP requests, with monthly free grants",
+        "Per node in the underlying cluster",
+        "Per revision created"
+      ],
+      "correctIndex": 1,
+      "explanation": "Consumption bills resource allocation as vCPU-seconds and GiB-seconds (active and idle rates) plus request charges, with monthly free grants.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/billing"
+    },
+    {
+      "id": "q30",
+      "category": "cost-geography-compliance",
+      "scenario": true,
+      "stem": "A steady, high-utilization workload runs continuously with predictable demand. Which billing model is often more economical?",
+      "options": [
+        "Consumption, always",
+        "Dedicated workload profile, because sustained usage can be cheaper than per-second Consumption plus a management fee comparison",
+        "Container Instances per-second",
+        "There is never a cost difference"
+      ],
+      "correctIndex": 1,
+      "explanation": "For sustained high utilization, a Dedicated profile (billed per instance plus a management fee) can undercut Consumption. The break-even depends on utilization.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/plans"
+    },
+    {
+      "id": "q31",
+      "category": "cost-geography-compliance",
+      "scenario": true,
+      "stem": "Data residency rules require processing to stay within a specific geography. What is the primary architectural lever?",
+      "options": [
+        "Revision labels",
+        "Region selection for the environment and its dependent data services",
+        "Traffic splitting weights",
+        "Probe configuration"
+      ],
+      "correctIndex": 1,
+      "explanation": "Residency is governed primarily by choosing compliant regions for the environment and its data services; ACA resources are region-scoped.",
+      "source": "https://learn.microsoft.com/en-us/azure/reliability/availability-zones-overview"
+    },
+    {
+      "id": "q32",
+      "category": "cost-geography-compliance",
+      "scenario": false,
+      "stem": "Which practice most reduces log-related cost while keeping useful signal?",
+      "options": [
+        "Disable all logging",
+        "Apply sampling and scope queries to needed fields and windows",
+        "Store logs only on replicas",
+        "Increase min replicas"
+      ],
+      "correctIndex": 1,
+      "explanation": "Telemetry sampling and disciplined, scoped querying reduce ingestion and retention cost while preserving actionable signal.",
+      "source": "https://learn.microsoft.com/en-us/azure/azure-monitor/logs/cost-logs"
+    },
+    {
+      "id": "q33",
+      "category": "selection-architecture",
+      "scenario": true,
+      "stem": "A latency-sensitive public API must never cold-start during business hours but can save cost overnight. What is a defensible configuration?",
+      "options": [
+        "Min replicas 0 at all times",
+        "A minimum replica floor during business hours and scale-to-zero permitted off-hours",
+        "Dedicated profile only, with no scaling",
+        "Disable ingress overnight"
+      ],
+      "correctIndex": 1,
+      "explanation": "Keeping a warm floor during peak hours protects the latency SLO while permitting scale-to-zero off-hours captures savings; the tradeoff is driven by the SLO.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app"
+    },
+    {
+      "id": "q34",
+      "category": "resource-model",
+      "scenario": false,
+      "stem": "Which statement about the Flex workload profile (preview) is accurate?",
+      "options": [
+        "It scales to zero like Consumption",
+        "It requires a /25 subnet and cannot scale to zero",
+        "It only supports Windows containers",
+        "It is the legacy default profile"
+      ],
+      "correctIndex": 1,
+      "explanation": "The Flex profile (preview) requires a /25 subnet and cannot scale to zero, positioning it between Consumption and Dedicated.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/workload-profiles-overview"
+    },
+    {
+      "id": "q35",
+      "category": "networking-security",
+      "scenario": true,
+      "stem": "A reviewer finds a database connection string committed in the repository for a Container App. Under the workshop rules, what is the impact?",
+      "options": [
+        "It is acceptable if the repo is private",
+        "It is a critical failure; secrets must come from Key Vault or secret references, never source control",
+        "It is fine if the app also uses managed identity",
+        "It only matters in production"
+      ],
+      "correctIndex": 1,
+      "explanation": "A committed credential is a critical failure. Secrets must be delivered via Key Vault references or app secrets and accessed with managed identity.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/manage-secrets"
+    },
+    {
+      "id": "q36",
+      "category": "scaling-performance-reliability",
+      "scenario": true,
+      "stem": "During a modeled zone failure, which outcome is expected for a zone-redundant environment?",
+      "options": [
+        "No requests ever fail and no data is lost",
+        "Capacity survives the zone loss, though in-flight requests may fail and ephemeral data in the lost zone is gone",
+        "The whole environment is deleted",
+        "All revisions roll back automatically"
+      ],
+      "correctIndex": 1,
+      "explanation": "Zone redundancy preserves capacity across a zone loss, but in-flight requests can fail and ephemeral data on lost replicas is gone. Durable state must be external and replicated.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/disaster-recovery"
+    },
+    {
+      "id": "q37",
+      "category": "delivery-operations",
+      "scenario": true,
+      "stem": "You need a stable test URL for a candidate revision while production weights change. What feature helps?",
+      "options": [
+        "Revision labels that provide stable per-revision URLs",
+        "Deleting the stable revision",
+        "External ingress only",
+        "A Dedicated profile"
+      ],
+      "correctIndex": 0,
+      "explanation": "Revision labels give a stable URL to a specific revision for testing, independent of the traffic weights controlling production distribution.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/revisions"
+    },
+    {
+      "id": "q38",
+      "category": "networking-security",
+      "scenario": false,
+      "stem": "What is the recommended way to protect a public Container Apps ingress from common web attacks?",
+      "options": [
+        "Rely solely on the app code",
+        "Place Azure Front Door or Application Gateway with WAF in front of ingress",
+        "Disable TLS",
+        "Use only NSGs on the subnet"
+      ],
+      "correctIndex": 1,
+      "explanation": "A WAF via Azure Front Door or Application Gateway in front of ingress protects against common web attacks and centralizes edge policy.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/waf-app-gateway"
+    },
+    {
+      "id": "q39",
+      "category": "cost-geography-compliance",
+      "scenario": false,
+      "stem": "Which monthly free grants are associated with the Consumption plan (per subscription) at the documented level?",
+      "options": [
+        "Unlimited vCPU-seconds and requests",
+        "Roughly 180,000 vCPU-seconds, 360,000 GiB-seconds, and 2 million requests",
+        "No free grants exist",
+        "Only 1,000 requests"
+      ],
+      "correctIndex": 1,
+      "explanation": "The Consumption plan includes documented monthly free grants of about 180,000 vCPU-seconds, 360,000 GiB-seconds, and 2 million requests.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/billing"
+    },
+    {
+      "id": "q40",
+      "category": "selection-architecture",
+      "scenario": true,
+      "stem": "A brownfield .NET app stores session state on the local disk of each instance. To move it to Container Apps, what change is required?",
+      "options": [
+        "Nothing; local session works across replicas",
+        "Move session to a distributed store because replicas are stateless and interchangeable",
+        "Set min replicas to 1 to keep session",
+        "Use a Dedicated profile to persist local disk"
+      ],
+      "correctIndex": 1,
+      "explanation": "Replicas are ephemeral and interchangeable, so in-process/local session must move to a distributed cache or store before migration.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/containers"
+    },
+    {
+      "id": "q41",
+      "category": "resource-model",
+      "scenario": false,
+      "stem": "Which two properties define a scale rule's bounds in Container Apps?",
+      "options": [
+        "CPU limit and memory limit only",
+        "Minimum and maximum replica counts",
+        "Ingress port and target port",
+        "Revision label and weight"
+      ],
+      "correctIndex": 1,
+      "explanation": "Scaling is bounded by minimum and maximum replica counts; the scale rule then decides where within those bounds to run.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app"
+    },
+    {
+      "id": "q42",
+      "category": "networking-security",
+      "scenario": true,
+      "stem": "An internal-facing worker should have no public exposure. Which ingress setting is correct?",
+      "options": [
+        "External ingress enabled",
+        "Ingress disabled or internal-only",
+        "External ingress with HTTP only",
+        "Ingress must always be external"
+      ],
+      "correctIndex": 1,
+      "explanation": "A background worker that nothing calls over HTTP should have ingress disabled; a private caller uses internal ingress. Never expose it externally.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/ingress-overview"
+    },
+    {
+      "id": "q43",
+      "category": "scaling-performance-reliability",
+      "scenario": true,
+      "stem": "You measure p95 latency well within SLO but p99 spikes during scale-out. What is a reasonable interpretation?",
+      "options": [
+        "The SLO is already violated",
+        "Cold-start or resource contention during scale events affects tail latency; consider warm floor or resource tuning",
+        "p99 is irrelevant",
+        "The environment must be recreated"
+      ],
+      "correctIndex": 1,
+      "explanation": "Tail latency spikes during scale-out often reflect cold-start or contention. A warm minimum or resource tuning can protect p99 if the SLO demands it.",
+      "source": "https://learn.microsoft.com/en-us/azure/well-architected/performance-efficiency/"
+    },
+    {
+      "id": "q44",
+      "category": "delivery-operations",
+      "scenario": false,
+      "stem": "Why should container images be referenced by digest rather than a mutable tag for certification evidence?",
+      "options": [
+        "Digests deploy faster",
+        "A digest is immutable and guarantees the exact image, ensuring reproducibility",
+        "Tags are not supported",
+        "Digests reduce cost"
+      ],
+      "correctIndex": 1,
+      "explanation": "A digest pins the exact image content, giving reproducible deployments; a mutable tag can change underneath you.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-concepts"
+    },
+    {
+      "id": "q45",
+      "category": "cost-geography-compliance",
+      "scenario": true,
+      "stem": "Leadership asks for cost per successful transaction. What must the cost model include beyond compute?",
+      "options": [
+        "Only vCPU cost",
+        "Requests, logs/telemetry, network egress, registry, storage, security, and edge services",
+        "Only the management fee",
+        "Only storage"
+      ],
+      "correctIndex": 1,
+      "explanation": "Total cost of ownership spans compute, requests, telemetry, network, registry, storage, security, and edge; unit economics require all of them.",
+      "source": "https://azure.microsoft.com/en-us/pricing/details/container-apps/"
+    },
+    {
+      "id": "q46",
+      "category": "scaling-performance-reliability",
+      "scenario": false,
+      "stem": "Which alerting approach reduces false pages against an error budget?",
+      "options": [
+        "A single static threshold on raw errors",
+        "Multi-window burn-rate alerts on the error budget",
+        "Alerting only on CPU",
+        "No alerting; rely on dashboards"
+      ],
+      "correctIndex": 1,
+      "explanation": "Multi-window, multi-burn-rate alerts on the error budget catch fast and slow burns while suppressing noise from brief blips.",
+      "source": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/monitoring-alerting-strategy"
+    },
+    {
+      "id": "q47",
+      "category": "networking-security",
+      "scenario": true,
+      "stem": "You must prove private access is actually enforced. Which evidence is sufficient?",
+      "options": [
+        "A screenshot of the DNS zone",
+        "A public client that fails plus an approved private client that resolves the private address and succeeds",
+        "A note that ingress is internal",
+        "The app returns 200 from your laptop"
+      ],
+      "correctIndex": 1,
+      "explanation": "Enforcement is proven by a failing public attempt and a succeeding approved private attempt, combining resolution and reachability.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/networking"
+    },
+    {
+      "id": "q48",
+      "category": "selection-architecture",
+      "scenario": false,
+      "stem": "Which component provides the managed ingress and TLS termination inside a Container Apps environment?",
+      "options": [
+        "Dapr",
+        "Envoy-based ingress managed by the platform",
+        "The container registry",
+        "Key Vault"
+      ],
+      "correctIndex": 1,
+      "explanation": "Container Apps uses an Envoy-based managed ingress for HTTP routing and TLS termination, abstracted from the user.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/ingress-overview"
+    },
+    {
+      "id": "q49",
+      "category": "delivery-operations",
+      "scenario": true,
+      "stem": "A scale-rule change was applied and a new revision appeared unexpectedly to a team. What should they have documented first?",
+      "options": [
+        "Nothing; revisions are random",
+        "Which properties are revision-scoped versus application-scoped before editing",
+        "The cost per request",
+        "The DNS zone name"
+      ],
+      "correctIndex": 1,
+      "explanation": "Knowing which changes are revision-scoped (create a new revision) versus application-scoped (apply in place) prevents surprise revisions during operations.",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/revisions"
+    },
+    {
+      "id": "q50",
+      "category": "cost-geography-compliance",
+      "scenario": true,
+      "stem": "You right-size an app and cut CPU, but a re-run load test shows p99 regressing past SLO. What is the correct action?",
+      "options": [
+        "Keep the saving; cost matters most",
+        "Reject the change because it regressed reliability/performance, and record the evidence",
+        "Delete the load test",
+        "Increase min replicas to hide it"
+      ],
+      "correctIndex": 1,
+      "explanation": "A cost saving that regresses the SLO must be rejected and documented; validated savings only count when reliability and performance hold.",
+      "source": "https://learn.microsoft.com/en-us/azure/well-architected/cost-optimization/"
+    }
+  ]
+}

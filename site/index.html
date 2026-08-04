@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Well-Architected Azure Container Apps · Level 400 Workshop</title>
+  <meta name="description" content="A self-paced or instructor-led Level 400 workshop that empirically proves 80% competency in Azure Container Apps through hands-on activities and evidence gates." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234aa8ff'/><text x='50' y='68' font-size='58' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>C</text></svg>" />
+</head>
+<body>
+  <!-- Top nav -->
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <span class="logo">C</span>
+        <span>Well-Architected ACA<small>Azure Container Apps · L400</small></span>
+      </a>
+      <nav class="navlinks">
+        <a href="index.html">Overview</a>
+        <a href="lab.html">Lab guide</a>
+        <a href="knowledge-check.html">Knowledge check</a>
+        <a class="btn btn-primary btn-sm nav-cta text-white" href="#start">Start</a>
+        <button class="icon-btn" data-theme-toggle title="Toggle theme">◐ <span data-theme-label>Light</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap">
+      <p class="kicker">Self-paced or instructor-led · Level 400</p>
+      <h1>Prove <span class="grad">80% competency</span><br />in Azure Container Apps</h1>
+      <p class="lede">
+        This is not a demo tour. Across eight hands-on modules you predict, build, break, observe, recover, and
+        defend real Azure Container Apps workloads — then capture the evidence that empirically certifies your
+        proficiency at a level-400 depth. Every claim is grounded in official Microsoft documentation.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#start">Choose your mode →</a>
+        <a class="btn btn-ghost" href="lab.html">Jump to the lab guide</a>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="num">8</div><div class="lbl">Hands-on modules</div></div>
+        <div class="stat"><div class="num">100</div><div class="lbl">Points to certify</div></div>
+        <div class="stat"><div class="num">≥80%</div><div class="lbl">Competency gate</div></div>
+        <div class="stat"><div class="num">50+</div><div class="lbl">Knowledge-check bank</div></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- Delivery contract -->
+  <section>
+    <div class="wrap">
+      <p class="kicker">The delivery contract</p>
+      <h2 class="section-title">Predict · Design · Build · Break · Observe · Recover · Defend</h2>
+      <p class="section-sub">
+        Competency is scored across five weighted dimensions, not on whether a container simply started.
+        Every activity produces artifacts a reviewer can verify against live Azure state.
+      </p>
+      <div class="grid-3">
+        <div class="card">
+          <span class="tag">Explain 15%</span><span class="tag">Design 20%</span>
+          <h3 class="card-title-sm">Reason before you run</h3>
+          <p class="card-copy">Justify service selection against AKS, App Service, Functions, ACI, and Jobs. Commit a falsifiable ADR with an exit trigger.</p>
+        </div>
+        <div class="card">
+          <span class="tag">Implement 25%</span><span class="tag">Validate 25%</span>
+          <h3 class="card-title-sm">Build and prove</h3>
+          <p class="card-copy">Ship digest-pinned images, private ingress, managed identity, KEDA scaling, canaries, and telemetry — each with a validation gate.</p>
+        </div>
+        <div class="card">
+          <span class="tag">Operate &amp; defend 15%</span>
+          <h3 class="card-title-sm">Recover and defend</h3>
+          <p class="card-copy">Diagnose injected incidents from evidence, recover within SLO, and defend your design against counterfactual changes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scenario -->
+  <section>
+    <div class="wrap">
+      <p class="kicker">The scenarios</p>
+      <h2 class="section-title">Two workloads carry the whole workshop</h2>
+      <p class="section-sub">Every module applies to a concrete system so decisions have consequences you can measure.</p>
+      <div class="grid-2">
+        <div class="card scenario-card">
+          <span class="tagline">Greenfield · retail</span>
+          <h3>Contoso order platform</h3>
+          <ul>
+            <li>Public order API, private internal catalog, a Service Bus worker, and a scheduled reconciliation job</li>
+            <li>PostgreSQL, Key Vault, and an approved Azure Container Registry</li>
+            <li>100 req/s average, 1,500 req/s peak</li>
+            <li>99.95% availability · RTO 30 min · RPO 5 min</li>
+          </ul>
+        </div>
+        <div class="card scenario-card">
+          <span class="tagline">Brownfield · migration</span>
+          <h3>Fabrikam modernization</h3>
+          <ul>
+            <li>A .NET web app and a Windows service running on VMs today</li>
+            <li>Local session state and file uploads, SQL polling, config-stored connection strings</li>
+            <li>Decide what ports to ACA, what is retained, and what needs another service</li>
+            <li>Sequence a strangler migration with gates and a time-bounded rollback</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section>
+    <div class="wrap">
+      <p class="kicker">Reference topology</p>
+      <h2 class="section-title">What you will build toward</h2>
+      <p class="section-sub">A production-shaped Container Apps environment with private data, controlled edge, and least-privilege identity.</p>
+      <div class="arch">Internet
+   │
+[ Azure Front Door + WAF ]
+   │  (TLS)
+┌──┴─────────────────────────────────────────────┐
+│  Container Apps environment  (workload profiles │
+│  v2, zone-redundant, VNet-injected)             │
+│                                                 │
+│   [order-api]  external ingress ─┐              │
+│        │ managed identity        │ traffic split│
+│   [catalog]    internal ingress  │  90 / 10     │
+│        │                          └── revisions  │
+│   [worker]     no ingress ◄── Service Bus (KEDA) │
+│   [reconcile]  scheduled job                     │
+└───────┬───────────────┬──────────────┬──────────┘
+        │               │              │
+   Key Vault        PostgreSQL   Azure Container
+ (Secrets User)     (private)       Registry (AcrPull)
+        │
+   Log Analytics ◄── console + system logs (KQL, alerts)</div>
+    </div>
+  </section>
+
+  <!-- Modules -->
+  <section id="modules">
+    <div class="wrap">
+      <p class="kicker">The curriculum</p>
+      <h2 class="section-title">Eight modules, one competency gate</h2>
+      <p class="section-sub">Each module ends in an evidence gate. Clear all gates plus the capstone to reach the 80% certification bar.</p>
+      <div class="modlist" id="module-list">
+        <div class="loading">Loading modules…</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- Mode selector -->
+  <section id="start">
+    <div class="wrap">
+      <p class="kicker">Choose how you learn</p>
+      <h2 class="section-title">Same activities. Same gates. Two paces.</h2>
+      <p class="section-sub">
+        Both modes use identical hands-on activities, validation steps, evidence gates, and knowledge checks.
+        Instructor-led mode adds talk tracks, discussion prompts, and demo cues. Your choice is saved in this browser.
+      </p>
+      <div class="modes">
+        <div class="mode-card" data-mode-card="self">
+          <span class="selected-flag">✓ Selected</span>
+          <div class="mode-icon">🧭</div>
+          <h3>Self-paced</h3>
+          <div class="mode-time">≈ 14–16 hours</div>
+          <p>Work through every module on your own schedule. Instructor callouts are hidden so you stay focused on doing the work and capturing evidence.</p>
+          <ul>
+            <li>Progress and evidence saved in your browser</li>
+            <li>Full validation gates and knowledge checks</li>
+            <li>Level-400 stretch goals on every activity</li>
+          </ul>
+          <a class="btn btn-primary btn-sm" href="lab.html?mode=self">Start self-paced →</a>
+        </div>
+        <div class="mode-card" data-mode-card="led">
+          <span class="selected-flag">✓ Selected</span>
+          <div class="mode-icon">🎓</div>
+          <h3>Instructor-led</h3>
+          <div class="mode-time">≈ 9 hours facilitated</div>
+          <p>Run the same activities in a facilitated session. Each activity surfaces a talk track, discussion prompt, and demo cue for the instructor.</p>
+          <ul>
+            <li>Facilitator talk tracks and calibration notes</li>
+            <li>Group discussion and live demo cues</li>
+            <li>Shared pacing across the cohort</li>
+          </ul>
+          <a class="btn btn-primary btn-sm" href="lab.html?mode=led">Start instructor-led →</a>
+        </div>
+      </div>
+      <p class="mode-note">The selected mode is remembered in this browser and applied when you open the lab guide.</p>
+    </div>
+  </section>
+
+  <!-- WAF pillars -->
+  <section>
+    <div class="wrap">
+      <p class="kicker">Grounded in the Well-Architected Framework</p>
+      <h2 class="section-title">Every gate maps to a WAF pillar</h2>
+      <p class="section-sub">Decisions are judged against Microsoft's Well-Architected Framework, not personal preference.</p>
+      <div class="pillars">
+        <div class="pillar"><div class="p-ico">🛡️</div><h4>Reliability</h4><p>SLOs, error budgets, zone failure</p></div>
+        <div class="pillar"><div class="p-ico">🔒</div><h4>Security</h4><p>Identity, private paths, no secrets</p></div>
+        <div class="pillar"><div class="p-ico">💵</div><h4>Cost</h4><p>Unit economics, right-sizing</p></div>
+        <div class="pillar"><div class="p-ico">⚙️</div><h4>Operational</h4><p>Canary, rollback, runbooks</p></div>
+        <div class="pillar"><div class="p-ico">⚡</div><h4>Performance</h4><p>KEDA scaling, tail latency</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="fnote">
+        Content grounded in official Microsoft Learn documentation · Official-source review date 2026-08-03.
+      </div>
+      <div class="row-center">
+        <a href="https://learn.microsoft.com/en-us/azure/container-apps/" target="_blank" rel="noopener">Microsoft Learn: Container Apps</a>
+        <button class="icon-btn" data-theme-toggle>◐ <span data-theme-label>Light</span></button>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    // Render module list from data and reflect the saved delivery mode on the selector cards.
+    (function () {
+      function badgeFor(tags) {
+        // A module is L400 unless every tag is clearly foundational; we surface both.
+        return '';
+      }
+      fetch("data/modules.json")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var host = document.getElementById("module-list");
+          host.innerHTML = "";
+          data.modules.forEach(function (m) {
+            var tags = (m.tags || []).map(function (t) { return '<span class="tag">' + t + "</span>"; }).join("");
+            var level = m.index <= 0 ? "l300" : "l400";
+            var levelLabel = m.index <= 0 ? "L300→400" : "L400";
+            var a = document.createElement("a");
+            a.className = "mod";
+            a.href = "lab.html#" + m.id;
+            a.innerHTML =
+              '<div class="idx">' + m.index + "</div>" +
+              '<div class="body"><h3>' + m.title + "</h3>" +
+              "<p>" + m.summary + "</p>" +
+              '<div class="tagrow">' + tags + "</div></div>" +
+              '<div class="meta">' +
+              '<span class="badge badge-' + level + '">' + levelLabel + "</span>" +
+              '<span class="badge badge-pts">' + m.domainPoints + " pts</span>" +
+              '<span class="dur">' + m.duration + "</span></div>";
+            host.appendChild(a);
+          });
+        })
+        .catch(function () {
+          document.getElementById("module-list").innerHTML =
+            '<div class="loading">Could not load modules. Serve this site over HTTP (e.g. a local static server) so fetch() can read the JSON.</div>';
+        });
+
+      // Mode selector card highlighting
+      document.addEventListener("DOMContentLoaded", function () {
+        var mode = window.WAACA.getMode();
+        function paint() {
+          document.querySelectorAll("[data-mode-card]").forEach(function (c) {
+            c.classList.toggle("selected", c.getAttribute("data-mode-card") === mode);
+          });
+        }
+        paint();
+        document.querySelectorAll("[data-mode-card]").forEach(function (c) {
+          c.addEventListener("click", function (e) {
+            if (e.target.closest("a")) return; // let the button navigate
+            mode = c.getAttribute("data-mode-card");
+            window.WAACA.setMode(mode);
+            paint();
+          });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

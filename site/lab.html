@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab guide · Well-Architected Azure Container Apps</title>
+  <meta name="description" content="Hands-on lab guide for the Level 400 Azure Container Apps competency workshop. Each activity has a pre-check, steps, a validation gate, evidence to capture, and a post-check." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234aa8ff'/><text x='50' y='68' font-size='58' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>C</text></svg>" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <span class="logo">C</span>
+        <span>Well-Architected ACA<small>Azure Container Apps · L400</small></span>
+      </a>
+      <nav class="navlinks">
+        <a href="index.html">Overview</a>
+        <a href="lab.html">Lab guide</a>
+        <a href="knowledge-check.html">Knowledge check</a>
+        <button class="icon-btn" data-mode-switch title="Switch delivery mode">⇄ <span data-mode-switch-label>Mode</span></button>
+        <button class="icon-btn" data-theme-toggle title="Toggle theme">◐ <span data-theme-label>Light</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap lab-header">
+    <p class="kicker">Hands-on lab guide</p>
+    <h1 class="page-title">Build the evidence that certifies you</h1>
+    <p class="lede-narrow">
+      Every activity has a pre-check, steps to run, a validation gate, evidence to capture, and a post-check.
+      Tick each activity as you complete it — your progress and evidence are saved in this browser.
+    </p>
+    <div class="row-wrap">
+      <span class="mode-pill" id="mode-indicator">🧭 Self-paced</span>
+      <button class="btn btn-ghost btn-sm" id="reset-progress">Reset my progress</button>
+    </div>
+  </div>
+
+  <div class="wrap lab-layout lab-layout-pad">
+    <!-- Progress rail -->
+    <aside class="rail" id="rail">
+      <h4>Modules</h4>
+      <div id="rail-mods"></div>
+      <div class="meter-wrap">
+        <div class="meter-label"><span>Competency progress</span><span id="meter-pct">0%</span></div>
+        <div class="meter"><div class="meter-fill" id="meter-fill"></div></div>
+        <p class="meter-note" id="meter-hint">Complete every activity to reach the 80% gate.</p>
+      </div>
+      <div class="meter-wrap">
+        <a class="btn btn-primary btn-sm rail-cta text-white" href="knowledge-check.html">Take the knowledge check →</a>
+      </div>
+    </aside>
+
+    <!-- Modules -->
+    <main id="lab-content">
+      <div class="loading">Loading lab content…</div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="fnote">Content grounded in official Microsoft Learn documentation · Review date 2026-08-03.</div>
+      <button class="icon-btn" data-theme-toggle>◐ <span data-theme-label>Light</span></button>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="lab.js"></script>
+</body>
+</html>

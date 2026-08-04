@@ -1,0 +1,581 @@
+{
+  "meta": {
+    "title": "Well-Architected Azure Container Apps",
+    "subtitle": "Level 400 · Empirical 80% competency workshop",
+    "passThreshold": 80,
+    "sourceReviewDate": "2026-08-03",
+    "totalPoints": 100
+  },
+  "modules": [
+    {
+      "id": "m0",
+      "index": 0,
+      "code": "L400-00",
+      "title": "Baseline and decision model",
+      "duration": "~2 hr",
+      "domainPoints": 10,
+      "tags": ["Decision", "ADR", "Service selection"],
+      "summary": "Agree the shape of the workload before anyone runs az containerapp create. Falsify ACA against AKS, App Service, Functions, Container Instances, and ACA Jobs, then commit an ADR with an exit trigger.",
+      "outcomes": [
+        "Select or reject ACA against five alternatives using hard constraints, not preference.",
+        "Explain environment, plan, workload profile, app, revision, replica, and job boundaries.",
+        "Write a falsifiable ADR with consequences and an exit trigger."
+      ],
+      "evidenceGate": "An ADR that records ten hard requirements, an elimination matrix citing Microsoft capability statements, a measured prototype result, a viable alternative, consequences, and an exit trigger.",
+      "activities": [
+        {
+          "id": "m0-a1",
+          "title": "Capture ten non-negotiable requirements",
+          "time": "~25 min",
+          "precheck": "You have a target workload description (use the Contoso greenfield case study if none is assigned).",
+          "steps": [
+            "List ten hard requirements: OS, process lifetime, protocols, state, isolation, privileged access, scaling signal, latency SLO, recovery objective, and team operating capability.",
+            "Mark each requirement as hard constraint or preference. Only hard constraints eliminate a service.",
+            "Record the source of each platform assumption from the References list."
+          ],
+          "validation": "Every requirement is testable and labelled constraint or preference.",
+          "evidence": "evidence/01-decision/requirements.md with 10 rows and a source column.",
+          "talkTrack": "Push the room to separate 'we prefer Kubernetes' from 'a CRD-based operator is mandatory'. Only the second is a constraint. Most bad platform choices are preferences dressed as requirements.",
+          "stretch": "Add a column for the failure mode created if the requirement is ignored."
+        },
+        {
+          "id": "m0-a2",
+          "title": "Build the elimination matrix",
+          "time": "~40 min",
+          "precheck": "Requirements table complete.",
+          "steps": [
+            "Create a matrix with columns for ACA, AKS, App Service, Functions, Container Instances, and ACA Jobs.",
+            "For each hard constraint, mark a service eliminated only when an official Microsoft capability statement conflicts.",
+            "Reduce to the two surviving options and price both for two years including platform labour, networking, telemetry, registry, security, idle capacity, and recovery region."
+          ],
+          "validation": "Each elimination cites a Microsoft source; two options survive with a two-year cost.",
+          "evidence": "evidence/01-decision/selection-matrix.md and cost-2yr.csv.",
+          "talkTrack": "Ask each team to defend one elimination out loud. If they cannot cite a Microsoft capability statement, the elimination is an opinion and gets challenged.",
+          "stretch": "Identify the single requirement that, if relaxed, would flip the recommendation."
+        },
+        {
+          "id": "m0-a3",
+          "title": "Prototype the highest-risk assumption and write the ADR",
+          "time": "~50 min",
+          "precheck": "Two surviving options identified.",
+          "steps": [
+            "Prototype the riskiest ACA assumption: cold/warm p95 for a latency-sensitive API, private name resolution and reachability for a private workload, or duplicate-safe recovery for an event worker.",
+            "Record measured output, not expectations.",
+            "Write a one-page ADR: context, decision, alternatives, consequences, and an exit trigger such as a required operator or Windows dependency."
+          ],
+          "validation": "ADR contains a measured prototype result and an explicit exit trigger.",
+          "evidence": "evidence/01-decision/ADR-0001.md plus raw prototype output.",
+          "talkTrack": "Change one requirement after the ADR is written and require re-evaluation. A good architect re-derives; a weak one defends the original choice by reflex.",
+          "stretch": "State what telemetry you would watch in production to know the exit trigger has fired."
+        }
+      ]
+    },
+    {
+      "id": "m1",
+      "index": 1,
+      "code": "L400-01",
+      "title": "Platform foundation",
+      "duration": "~3 hr",
+      "domainPoints": 15,
+      "tags": ["Environment", "Ingress", "Identity", "Probes"],
+      "summary": "Stand up a workload profiles (v2) environment, deploy a participant-owned image pinned by digest, and prove ingress, revisions, probes, and identity behave as designed.",
+      "outcomes": [
+        "Create a v2 environment with a Log Analytics destination.",
+        "Deploy an app with external TLS ingress and inspect effective state.",
+        "Configure startup, readiness, and liveness probes and prove each behaviour."
+      ],
+      "evidenceGate": "A reproducible deployment where HTTP redirects or is rejected, TLS succeeds, failed readiness removes traffic, failed liveness restarts a replica, the image uses an immutable digest, and configuration contains no credential.",
+      "activities": [
+        {
+          "id": "m1-a1",
+          "title": "Create environment and Log Analytics workspace",
+          "time": "~40 min",
+          "precheck": "Microsoft.App provider registered and containerapp extension current.",
+          "steps": [
+            "Create a resource group and a Log Analytics workspace in the approved region.",
+            "Create a workload profiles (v2) environment bound to the workspace.",
+            "Query the environment's effective properties and confirm type, region, and logging destination."
+          ],
+          "commands": "az group create --name \"$RESOURCE_GROUP\" --location \"$LOCATION\"\naz monitor log-analytics workspace create --resource-group \"$RESOURCE_GROUP\" --workspace-name \"$LOG_WORKSPACE\" --location \"$LOCATION\"\naz containerapp env create --name \"$ENVIRONMENT\" --resource-group \"$RESOURCE_GROUP\" --location \"$LOCATION\" --logs-workspace-id \"$LOG_ID\" --logs-workspace-key \"$LOG_KEY\"",
+          "validation": "az containerapp env show returns provisioningState Succeeded and the expected workspace.",
+          "evidence": "evidence/02-foundation/env-show.json.",
+          "talkTrack": "Reinforce that the environment is a trust, blast-radius, quota, and cost boundary. New environments should be v2 for the richer networking stack.",
+          "stretch": "Attempt to change the network type after creation and record the platform response."
+        },
+        {
+          "id": "m1-a2",
+          "title": "Deploy a digest-pinned app with external ingress",
+          "time": "~50 min",
+          "precheck": "A participant-owned image exists in ACR (replace the quickstart image).",
+          "steps": [
+            "Deploy the app with external ingress, a target port, min 1 and max 3 replicas, and modest CPU/memory.",
+            "Resolve the FQDN and confirm TLS succeeds and plain HTTP is redirected or rejected.",
+            "Inspect image, provisioning state, latest revision, and ingress configuration."
+          ],
+          "commands": "az containerapp create --name \"$APP_NAME\" --resource-group \"$RESOURCE_GROUP\" --environment \"$ENVIRONMENT\" --image \"$ACR_LOGIN_SERVER/app@sha256:...\" --target-port 8080 --ingress external --min-replicas 1 --max-replicas 3 --cpu 0.5 --memory 1.0Gi\naz containerapp show --name \"$APP_NAME\" --resource-group \"$RESOURCE_GROUP\" --query '{image:properties.template.containers[0].image,provisioning:properties.provisioningState,ingress:properties.configuration.ingress}' -o yaml",
+          "validation": "Image reference is a digest; curl over HTTPS succeeds; HTTP is redirected or refused.",
+          "evidence": "evidence/02-foundation/app-show.yaml and curl output.",
+          "talkTrack": "The quickstart image and a mutable latest tag demonstrate mechanics only. Certification evidence requires a digest.",
+          "stretch": "Show the revision and replica list and explain why local replica storage is not durable."
+        },
+        {
+          "id": "m1-a3",
+          "title": "Prove all three probe behaviours",
+          "time": "~50 min",
+          "precheck": "App deployed and reachable.",
+          "steps": [
+            "Add startup, readiness, and liveness probes via YAML or IaC.",
+            "Force readiness to fail and confirm traffic is removed from the replica.",
+            "Force liveness to fail and confirm the replica restarts; make startup slow and confirm it is tolerated."
+          ],
+          "validation": "Each probe produces its documented effect, visible in logs and revision/replica state.",
+          "evidence": "evidence/02-foundation/probe-tests.md with timestamps.",
+          "talkTrack": "Map each probe to a failure it prevents: startup tolerates slow boot, readiness gates traffic, liveness recovers a wedged process.",
+          "stretch": "Set a liveness probe more aggressive than startup time and explain the restart loop you create."
+        },
+        {
+          "id": "m1-a4",
+          "title": "Foundation failure lab",
+          "time": "~40 min",
+          "precheck": "Working deployment and probes in place.",
+          "steps": [
+            "Predict user-visible and platform behaviour, then inject exactly one fault: wrong target port, nonexistent image tag, or an invalid resource combination.",
+            "Diagnose from provisioning state, revision state, and system/console logs.",
+            "Repair through source or IaC and preserve both failed and recovered timelines."
+          ],
+          "validation": "Root cause identified from evidence and recovery verified.",
+          "evidence": "evidence/02-foundation/fault-timeline.md.",
+          "talkTrack": "Insist the prediction is written before the fault. Diagnosis quality is judged against the prediction, not hindsight.",
+          "stretch": "Explain which of your faults would be caught by a what-if or plan step before deployment."
+        }
+      ]
+    },
+    {
+      "id": "m2",
+      "index": 2,
+      "code": "L400-02",
+      "title": "Networking and security",
+      "duration": "~3 hr",
+      "domainPoints": 15,
+      "tags": ["Private ingress", "Managed identity", "RBAC", "Threat model"],
+      "summary": "Threat-model the workload, make required paths private, and prove least-privilege identity with positive and negative tests. No credentials anywhere.",
+      "outcomes": [
+        "Build a private inbound path and controlled egress.",
+        "Use managed identity for ACR pull, Key Vault, and runtime access.",
+        "Prove allowed operations succeed and forbidden operations fail."
+      ],
+      "evidenceGate": "A threat model, a public client that fails, an approved private client that resolves and succeeds, at least five negative access tests, and no committed credential.",
+      "activities": [
+        {
+          "id": "m2-a1",
+          "title": "Threat model the workload",
+          "time": "~35 min",
+          "precheck": "Foundation deployment available.",
+          "steps": [
+            "Draw a data-flow diagram covering ingress, application, identity, registry, pipeline, Key Vault, data, telemetry, and operators.",
+            "Apply STRIDE and list high risks.",
+            "For each high risk record a control, owner, validation, and residual-risk acceptance."
+          ],
+          "validation": "Every high risk has a named control and owner.",
+          "evidence": "evidence/03-network-security/threat-model.md.",
+          "talkTrack": "A threat model without owners is a wish list. Force a name against every high risk.",
+          "stretch": "Identify one risk that ACA's platform controls do not cover and who owns it."
+        },
+        {
+          "id": "m2-a2",
+          "title": "Private networking and egress",
+          "time": "~55 min",
+          "precheck": "Custom VNet with a subnet delegated to Microsoft.App/environments.",
+          "steps": [
+            "Create a v2 environment in the custom VNet; choose internal VIP or external VIP with public network access disabled.",
+            "Create and link the required private DNS zone; test resolution with nslookup and TLS with curl.",
+            "Enforce egress with NAT Gateway for a stable outbound IP or Azure Firewall for inspection, then test a forbidden destination."
+          ],
+          "commands": "az network vnet create --resource-group \"$RESOURCE_GROUP\" --name \"$VNET\" --address-prefixes 10.0.0.0/23\naz network vnet subnet create --resource-group \"$RESOURCE_GROUP\" --vnet-name \"$VNET\" --name aca --address-prefixes 10.0.0.0/23 --delegations Microsoft.App/environments\naz containerapp env create --name \"$ENVIRONMENT\" --resource-group \"$RESOURCE_GROUP\" --location \"$LOCATION\" --infrastructure-subnet-resource-id \"$SUBNET_ID\" --internal-only true",
+          "validation": "Public client fails; approved private client resolves the private address and succeeds; required Azure endpoints still work.",
+          "evidence": "evidence/03-network-security/dns-and-reachability.md.",
+          "talkTrack": "Name resolution is not reachability. Require both the DNS answer and the TCP/TLS result. Private endpoints require public network access disabled and add cost.",
+          "stretch": "Explain how UDR and NAT behaviour differ between v2 and legacy consumption-only environments."
+        },
+        {
+          "id": "m2-a3",
+          "title": "Managed identity, ACR, and Key Vault",
+          "time": "~55 min",
+          "precheck": "ACR and a training Key Vault available.",
+          "steps": [
+            "Create a user-assigned pull identity before app creation and assign AcrPull at the registry scope.",
+            "Assign a separate runtime identity and grant only Key Vault Secrets User on one vault.",
+            "Create a versioned Key Vault secret reference, retrieve it through the app, then attempt a forbidden secret and a forbidden write."
+          ],
+          "commands": "az identity create --name \"$PULL_ID\" --resource-group \"$RESOURCE_GROUP\"\naz role assignment create --assignee \"$PULL_PRINCIPAL\" --role AcrPull --scope \"$ACR_ID\"\naz role assignment create --assignee \"$RUNTIME_PRINCIPAL\" --role \"Key Vault Secrets User\" --scope \"$KV_ID\"",
+          "validation": "Allowed pull and secret read succeed; forbidden secret and write fail.",
+          "evidence": "evidence/03-network-security/rbac-allow-deny.md.",
+          "talkTrack": "A system-assigned identity does not exist until its app exists, which breaks create-time Key Vault references. Prefer user-assigned for pull.",
+          "stretch": "Remove one role, observe propagation and failure, restore it, then rotate the secret without rebuilding the image."
+        },
+        {
+          "id": "m2-a4",
+          "title": "Five negative access tests",
+          "time": "~35 min",
+          "precheck": "Private ingress and identities configured.",
+          "steps": [
+            "Execute at least five negative tests: public path, plain HTTP, wrong identity, forbidden secret, unapproved image, or privileged operation.",
+            "Record which layer denied each attempt.",
+            "Confirm no credential appears in source, history, or configuration."
+          ],
+          "validation": "Every negative test is denied and the denying layer is identified.",
+          "evidence": "evidence/03-network-security/negative-tests.md.",
+          "talkTrack": "This is the module where a critical failure ends certification: an exposed required-private service or a committed credential.",
+          "stretch": "Add Azure Policy to deny an unapproved image source and prove the denial."
+        }
+      ]
+    },
+    {
+      "id": "m3",
+      "index": 3,
+      "code": "L400-03",
+      "title": "Scaling, resilience, performance",
+      "duration": "~3 hr",
+      "domainPoints": 15,
+      "tags": ["KEDA", "SLO", "Load", "Zone redundancy"],
+      "summary": "Define SLOs, drive KEDA scaling from real signals, and prove the workload survives replica death, slow dependencies, and a modelled zone failure.",
+      "outcomes": [
+        "Define an SLI, SLO, and error budget.",
+        "Configure HTTP and event-driven scaling with derived bounds.",
+        "Demonstrate resilience to replica death and a zone failure model."
+      ],
+      "evidenceGate": "An SLO with error budget, load graphs showing scale-out and scale-in, a killed replica recovered within SLO, and a documented zone-failure behaviour.",
+      "activities": [
+        {
+          "id": "m3-a1",
+          "title": "Define the SLI, SLO, and error budget",
+          "time": "~30 min",
+          "precheck": "A working app or event worker.",
+          "steps": [
+            "Choose an availability or successful-processing SLI and define valid and good events.",
+            "Set the SLO and window and compute the error budget (99.9% over 30 days is about 43.2 minutes).",
+            "Define burn-rate alert thresholds."
+          ],
+          "validation": "Error budget is computed and burn-rate thresholds are stated.",
+          "evidence": "evidence/04-reliability/slo.md.",
+          "talkTrack": "Reliability decisions are downstream of the SLO. Do not let teams pick replica counts before the budget exists.",
+          "stretch": "Show how a two-window burn-rate alert reduces false pages versus a single threshold."
+        },
+        {
+          "id": "m3-a2",
+          "title": "HTTP scaling under load",
+          "time": "~45 min",
+          "precheck": "SLO defined; load tool (k6 or Azure Load Testing) ready.",
+          "steps": [
+            "Configure an HTTP concurrency scale rule with finite min and max replicas.",
+            "Run baseline, peak, and spike load and capture p50/p95/p99, errors, replicas, and saturation.",
+            "Confirm a new revision is created when the scale rule changes."
+          ],
+          "validation": "Load graphs show scale-out to the bottleneck and scale-in afterward.",
+          "evidence": "evidence/04-reliability/http-load.md plus graphs.",
+          "talkTrack": "More replicas can amplify a throttled dependency. Scale to the bottleneck, not past it.",
+          "stretch": "Find the replica count where end-to-end throughput stops improving and explain why."
+        },
+        {
+          "id": "m3-a3",
+          "title": "Event-driven scaling with derived concurrency",
+          "time": "~50 min",
+          "precheck": "A queue (Service Bus or Storage) and a worker image.",
+          "steps": [
+            "Compute the initial replica bound from safe downstream concurrency: replicas_max <= floor((D - R) / c).",
+            "Publish 1x, 5x, and 20x batches and record polling delay, queue age, replicas, completion rate, retries, and dead letters.",
+            "Kill a replica mid-message and explain the at-least-once result."
+          ],
+          "validation": "Scale-out, drain, and scale-in are observed; duplicate handling is explained.",
+          "evidence": "evidence/04-reliability/keda-worker.md.",
+          "talkTrack": "Use managed identity for scaler authentication where supported. Concurrency should come from downstream capacity and lock duration, not a guess.",
+          "stretch": "Introduce a poison message and prove bounded retries and dead-lettering."
+        },
+        {
+          "id": "m3-a4",
+          "title": "Resilience and zone-failure model",
+          "time": "~55 min",
+          "precheck": "A zone-redundant environment where the region supports zones.",
+          "steps": [
+            "Inject replica death and a slow dependency and confirm the app stays within SLO.",
+            "Model a zone failure: capacity must survive loss, in-flight requests can fail, ephemeral data in the failed zone is lost, and affected jobs can be aborted.",
+            "Configure Service Health plus workload alerts on replica-count drops and failure rates."
+          ],
+          "validation": "SLI recovers through each scenario and zone behaviour is documented.",
+          "evidence": "evidence/04-reliability/resilience-timeline.md.",
+          "talkTrack": "Zone redundancy must be enabled at environment creation and cannot be changed later. If they forgot, the fix is a new environment.",
+          "stretch": "Configure a job with retries or parallelism so a single execution survives a zone loss."
+        }
+      ]
+    },
+    {
+      "id": "m4",
+      "index": 4,
+      "code": "L400-04",
+      "title": "Delivery and observability",
+      "duration": "~3 hr",
+      "domainPoints": 15,
+      "tags": ["Revisions", "Canary", "Rollback", "KQL", "Alerts"],
+      "summary": "Ship immutable digests through revisions, run a gated canary, roll back by traffic in under five minutes, and prove you can query and alert on correlated telemetry.",
+      "outcomes": [
+        "Split traffic across revisions and run a canary.",
+        "Roll back by traffic change without rebuilding.",
+        "Query logs with KQL and raise a working alert."
+      ],
+      "evidenceGate": "A 90/10 canary with separate candidate telemetry, a rollback completed in under five minutes, a useful KQL query, and an alert that fires to an action group.",
+      "activities": [
+        {
+          "id": "m4-a1",
+          "title": "Enable multiple revisions and split traffic",
+          "time": "~45 min",
+          "precheck": "App in single-revision mode with a digest-pinned image.",
+          "steps": [
+            "Switch to multiple revision mode and deploy a new immutable revision.",
+            "Route 90 percent to stable and 10 percent to candidate using explicit weights totalling 100.",
+            "Confirm revision labels give stable test URLs while weights control production traffic."
+          ],
+          "commands": "az containerapp revision set-mode --name \"$APP_NAME\" --resource-group \"$RESOURCE_GROUP\" --mode multiple\naz containerapp ingress traffic set --name \"$APP_NAME\" --resource-group \"$RESOURCE_GROUP\" --revision-weight \"$STABLE=90\" \"$CANDIDATE=10\"",
+          "validation": "Traffic weights total 100 and both revisions are active.",
+          "evidence": "evidence/05-delivery/traffic-split.md.",
+          "talkTrack": "Record which changes are revision-scoped versus application-scoped before editing. A scale-rule change creates a revision; a secret value change may not.",
+          "stretch": "Show a label-based test URL that stays stable while you change weights."
+        },
+        {
+          "id": "m4-a2",
+          "title": "Gated canary and fast rollback",
+          "time": "~45 min",
+          "precheck": "Canary revision receiving a small traffic share.",
+          "steps": [
+            "Observe candidate latency and error rate separately from stable.",
+            "Promote only if the SLO gate passes; otherwise hold.",
+            "Roll back by shifting traffic to the previous known-good revision and time the operation."
+          ],
+          "validation": "Rollback completes in under five minutes without rebuilding the image.",
+          "evidence": "evidence/05-delivery/canary-rollback.md with a timestamp.",
+          "talkTrack": "A good 90/10 canary can still fail at 100 percent under full load. The gate is a hypothesis, not a guarantee.",
+          "stretch": "Automate the rollback trigger from a metric threshold."
+        },
+        {
+          "id": "m4-a3",
+          "title": "Correlated telemetry and KQL",
+          "time": "~45 min",
+          "precheck": "App logging to Log Analytics.",
+          "steps": [
+            "Emit logs that identify app, revision, replica, request, and outcome.",
+            "Write a KQL query that isolates candidate-revision errors over a correct time window.",
+            "Correlate a metric spike with a log event and a trace."
+          ],
+          "commands": "ContainerAppConsoleLogs_CL\n| where ContainerAppName_s == \"$APP_NAME\"\n| where TimeGenerated > ago(1h)\n| summarize count() by RevisionName_s, bin(TimeGenerated, 5m)",
+          "validation": "The query returns candidate-revision errors and the time window is correct.",
+          "evidence": "evidence/06-observability/kql.md.",
+          "talkTrack": "ACA does not support the Application Insights auto-instrumentation agent; instrument with the SDK if you need distributed tracing.",
+          "stretch": "Enable the managed OpenTelemetry agent and describe what it exports."
+        },
+        {
+          "id": "m4-a4",
+          "title": "Alert and runbook",
+          "time": "~35 min",
+          "precheck": "A validated KQL query or a metric of interest.",
+          "steps": [
+            "Create a log or metric alert with an action group.",
+            "Trigger the condition and confirm the alert fires.",
+            "Exercise the runbook from the alert and file a blameless follow-up with owner and due date."
+          ],
+          "validation": "The alert fires to the action group and the runbook resolves the condition.",
+          "evidence": "evidence/06-observability/alert-and-runbook.md.",
+          "talkTrack": "An alert with no runbook is noise. Require the responder path before the alert is considered done.",
+          "stretch": "Add a dead-letter or job-failure alert alongside the SLO alert."
+        }
+      ]
+    },
+    {
+      "id": "m5",
+      "index": 5,
+      "code": "L400-05",
+      "title": "Enterprise architecture and cost",
+      "duration": "~2 hr",
+      "domainPoints": 10,
+      "tags": ["Cost model", "Right-sizing", "Platform", "Stamps"],
+      "summary": "Model total cost, right-size from percentiles, and defend an enterprise platform design against injected failures.",
+      "outcomes": [
+        "Build a total cost model with unit economics.",
+        "Right-size resources and scaling from observed data.",
+        "Defend a multi-region, multi-team stamp design."
+      ],
+      "evidenceGate": "A cost workbook with a source column, a right-sizing change validated against load, and a stamp design that survives injected faults or renegotiates SLOs explicitly.",
+      "activities": [
+        {
+          "id": "m5-a1",
+          "title": "Total cost model",
+          "time": "~40 min",
+          "precheck": "Observed utilisation from Module 3 available.",
+          "steps": [
+            "Model compute, requests, logs, network, registry, storage, security, and edge costs.",
+            "Use current regional rates from the pricing calculator and record a source URL per line.",
+            "Compute cost per successful transaction and the break-even utilisation where Dedicated beats Consumption."
+          ],
+          "validation": "Every cost line has a source and the break-even point is computed.",
+          "evidence": "evidence/07-cost/cost-workbook.csv.",
+          "talkTrack": "Model idle rules honestly. A configured minimum replica does not guarantee every second is billed as idle, and features like private endpoints carry management charges.",
+          "stretch": "Sensitivity-test traffic at 0.5x, 1x, 2x, and 10x and telemetry at two sampling rates."
+        },
+        {
+          "id": "m5-a2",
+          "title": "Right-size and re-test",
+          "time": "~40 min",
+          "precheck": "Baseline load result available.",
+          "steps": [
+            "Right-size CPU, memory, and scale bounds from p95/p99, throttling, and OOM evidence.",
+            "Apply one saving in a sandbox.",
+            "Repeat the load test and reject the saving if reliability or performance regresses."
+          ],
+          "validation": "The change is justified by data and re-validated under load.",
+          "evidence": "evidence/07-cost/right-sizing.md.",
+          "talkTrack": "Tune one parameter at a time. Simultaneous changes destroy attribution.",
+          "stretch": "Show the cost delta per successful transaction, not just raw compute."
+        },
+        {
+          "id": "m5-a3",
+          "title": "Defend the enterprise stamp design",
+          "time": "~40 min",
+          "precheck": "Familiarity with the enterprise-scale reference from the guide.",
+          "steps": [
+            "Sketch a two-region, three-team deployment-stamp design with Front Door/WAF, private data, approved ACR, Key Vault, and central observability.",
+            "Assign environment grouping by trust, network, compliance, lifecycle, and blast radius.",
+            "Have a reviewer inject quota exhaustion, a compromised image, a DNS outage, 10x demand, new residency, and a primary-data-region failure."
+          ],
+          "validation": "SLOs are preserved or renegotiated explicitly under each injected fault.",
+          "evidence": "evidence/07-cost/stamp-defense.md.",
+          "talkTrack": "The platform is only successful if application teams still own application reliability and can inspect the generated IaC.",
+          "stretch": "Define the work required to upgrade every stamp to a new module version."
+        }
+      ]
+    },
+    {
+      "id": "m6",
+      "index": 6,
+      "code": "L400-06",
+      "title": "Case studies and catalog",
+      "duration": "~2 hr",
+      "domainPoints": 5,
+      "tags": ["Greenfield", "Brownfield", "Catalog"],
+      "summary": "Apply the model to Contoso greenfield and Fabrikam brownfield decisions, then process one valid and one unsafe catalog request.",
+      "outcomes": [
+        "Design a greenfield ACA topology to stated SLOs.",
+        "Plan a brownfield migration with a strangler sequence.",
+        "Approve or reject catalog requests with automation evidence."
+      ],
+      "evidenceGate": "A greenfield design, a brownfield migration plan with rollback criteria, and a catalog decision that proves automation blocks the unsafe request.",
+      "activities": [
+        {
+          "id": "m6-a1",
+          "title": "Contoso greenfield design",
+          "time": "~40 min",
+          "precheck": "Contoso requirements: 100 rps average, 1,500 peak, 99.95%, RTO 30 min, RPO 5 min.",
+          "steps": [
+            "Assign apps for API and catalog and worker, and a scheduled job for reconciliation.",
+            "Place Front Door/WAF before controlled ingress; keep internal components private; control egress.",
+            "Configure separate managed identities, canary gates, and data replication to RPO."
+          ],
+          "validation": "Design meets the stated SLOs and recovery objectives.",
+          "evidence": "evidence/08-capstone/contoso-design.md.",
+          "talkTrack": "Ask how they prove the RPO. Replication configured is not replication tested.",
+          "stretch": "Calculate cost per 1,000 successful orders."
+        },
+        {
+          "id": "m6-a2",
+          "title": "Fabrikam brownfield migration",
+          "time": "~40 min",
+          "precheck": "Fabrikam estate: .NET web app and Windows service on VMs, local session and uploads, SQL polling, config-stored connection string.",
+          "steps": [
+            "Classify Windows and local-state blockers; port, retain, or select another service.",
+            "Move session to a distributed store, files to Blob, secrets to Key Vault, durable work to SQL or messaging.",
+            "Sequence a strangler migration with gates, reconciliation, and a time-bounded rollback."
+          ],
+          "validation": "An unportable Windows dependency is retained on a suitable platform while eligible services move.",
+          "evidence": "evidence/08-capstone/fabrikam-migration.md.",
+          "talkTrack": "A correct answer does not force everything into ACA. It moves what fits and keeps what does not on a suitable platform.",
+          "stretch": "Produce the retirement checklist for old credentials, routes, and resources."
+        },
+        {
+          "id": "m6-a3",
+          "title": "Catalog admission: one valid, one unsafe",
+          "time": "~40 min",
+          "precheck": "Catalog request schema from the guide.",
+          "steps": [
+            "Process one valid and one unsafe request in 45 minutes.",
+            "Choose standalone, fleet, alternate, or reject, and identify omissions.",
+            "Produce required resources, approvals, and tests, and explain rollback."
+          ],
+          "validation": "Automation blocks the unsafe request (latest tag, unbounded scale, embedded credential, or public exposure of restricted data).",
+          "evidence": "evidence/08-capstone/catalog-decision.md.",
+          "talkTrack": "Full credit requires proving the automation blocks the unsafe request, not just describing why it is unsafe.",
+          "stretch": "Add the noisy-neighbour test that would route the workload to standalone."
+        }
+      ]
+    },
+    {
+      "id": "m7",
+      "index": 7,
+      "code": "L400-07",
+      "title": "Individual capstone and defense",
+      "duration": "~3 hr",
+      "domainPoints": 15,
+      "tags": ["Capstone", "Incident", "Oral defense"],
+      "summary": "Individually deploy or repair an external API and event worker to the full evidence bar, recover from two injected faults, and defend the design.",
+      "outcomes": [
+        "Deliver the full technical bar under time pressure.",
+        "Diagnose and recover from two randomized faults.",
+        "Defend the design against counterfactual changes."
+      ],
+      "evidenceGate": "Score at least 80/100 overall, at least 60% in every category, and avoid every critical failure.",
+      "activities": [
+        {
+          "id": "m7-a1",
+          "title": "Deploy or repair to the full bar",
+          "time": "~110 min",
+          "precheck": "Clean or randomized environment issued by the assessor.",
+          "steps": [
+            "Deliver TLS-only API ingress, no worker ingress, managed identity, no credentials, and all three probe types.",
+            "Configure bounded HTTP and queue scaling, correlated telemetry, a query, and an alert.",
+            "Run a canary with rollback and produce SLO, load, and cost evidence."
+          ],
+          "validation": "All boundaries are correct and reproducible from IaC or documented CLI.",
+          "evidence": "evidence/08-capstone/capstone-artifacts/.",
+          "talkTrack": "Assessors verify live Azure state and raw evidence, not the candidate narrative. Reset and randomize between candidates.",
+          "stretch": "Deliver the entire bar from reviewed IaC with a what-if step."
+        },
+        {
+          "id": "m7-a2",
+          "title": "Recover from two injected faults",
+          "time": "~40 min",
+          "precheck": "Assessor injects two faults from the pool.",
+          "steps": [
+            "Diagnose from evidence: target port, readiness path, denied role, private DNS, poison message, OOM, runaway scale, bad revision traffic, or downstream throttling.",
+            "Apply a safe mitigation and verify recovery.",
+            "Record detection, mitigation, and recovery timestamps."
+          ],
+          "validation": "Both faults are recovered with evidence-based cause and verified recovery.",
+          "evidence": "evidence/08-capstone/incident-timeline.md.",
+          "talkTrack": "Ask what would falsify the diagnosis. A candidate who cannot answer is pattern-matching, not reasoning.",
+          "stretch": "Show the telemetry that would have detected the fault before users did."
+        },
+        {
+          "id": "m7-a3",
+          "title": "Oral defense",
+          "time": "~30 min",
+          "precheck": "Capstone artifacts submitted.",
+          "steps": [
+            "Answer counterfactual prompts: why zero minimum is valid, what happens when every replica retries throttling, how to prove private access.",
+            "Explain why a good 90/10 canary can fail at 100 percent and which dependency defeats regional failover.",
+            "State which requirement would force AKS or another service."
+          ],
+          "validation": "The candidate handles at least two counterfactual changes without contradiction.",
+          "evidence": "evidence/08-capstone/defense-notes.md.",
+          "talkTrack": "Score reasoning and tradeoff quality, not service preference. Retain transcript, results, and defense notes.",
+          "stretch": "Have the candidate propose the next experiment they would run in production."
+        }
+      ]
+    }
+  ]
+}

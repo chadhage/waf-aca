@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knowledge check · Well-Architected Azure Container Apps</title>
+  <meta name="description" content="A randomized 25-question knowledge check drawn from a bank of 50+ questions across six weighted categories. Score 80% or higher to certify." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234aa8ff'/><text x='50' y='68' font-size='58' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>C</text></svg>" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <span class="logo">C</span>
+        <span>Well-Architected ACA<small>Azure Container Apps · L400</small></span>
+      </a>
+      <nav class="navlinks">
+        <a href="index.html">Overview</a>
+        <a href="lab.html">Lab guide</a>
+        <a href="knowledge-check.html">Knowledge check</a>
+        <button class="icon-btn" data-theme-toggle title="Toggle theme">◐ <span data-theme-label>Light</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Intro screen -->
+  <section class="wrap section-pad" id="kc-intro">
+    <p class="kicker">Randomized competency check</p>
+    <h1 class="page-title">Prove it on the 80% gate</h1>
+    <div class="kc-intro">
+      <p class="text-dim">
+        Twenty-five questions are drawn at random from a bank of fifty, weighted across six categories:
+        service selection, resource model, networking and security, scaling and reliability, delivery and
+        operations, and cost and compliance. Most questions are scenario-based. You need <strong>80% or higher</strong> to pass,
+        and every answer links to its official Microsoft source.
+      </p>
+      <div class="grid-3 mt-24">
+        <div class="card"><div class="num stat-num-sm">25</div><div class="lbl stat-lbl-sm">Questions issued</div></div>
+        <div class="card"><div class="num stat-num-sm">≥80%</div><div class="lbl stat-lbl-sm">To certify</div></div>
+        <div class="card"><div class="num stat-num-sm">6</div><div class="lbl stat-lbl-sm">Weighted categories</div></div>
+      </div>
+      <div class="row-actions">
+        <button class="btn btn-primary" id="start-kc">Start the check →</button>
+        <a class="btn btn-ghost" href="lab.html">Back to the lab guide</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quiz screen -->
+  <section class="wrap hidden section-pad-sm" id="kc-quiz">
+    <div class="kc-card">
+      <div class="kc-progress"><div class="kc-progress-fill" id="kc-progress-fill"></div></div>
+      <div class="card">
+        <div class="split-center">
+          <span class="q-counter" id="q-counter">Question 1 of 25</span>
+          <span class="q-cat" id="q-cat"></span>
+        </div>
+        <p class="q-stem" id="q-stem"></p>
+        <div id="q-options"></div>
+        <div class="explain" id="q-explain"></div>
+        <div class="kc-nav">
+          <span class="q-hint" id="q-hint">Select an answer</span>
+          <button class="btn btn-primary btn-sm hidden" id="q-next">Next →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Result screen -->
+  <section class="wrap hidden section-pad" id="kc-result">
+    <div class="result" id="result-inner"></div>
+  </section>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="fnote">All answer sources point to official Microsoft documentation · Review date 2026-08-03.</div>
+      <button class="icon-btn" data-theme-toggle>◐ <span data-theme-label>Light</span></button>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="knowledge-check.js"></script>
+</body>
+</html>
